@@ -1,26 +1,134 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My Personal Website</title>
-    <style>
-      /* Keep aspect ratio and position image */
-      img {
-        width: 30%;
-        max-height: auto;
-        object-fit: cover;
-        float: right;
-        margin: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Welcome to my personal website!</h1>
-    <img src="./photos/photo.jpeg" alt="A picture of myself">
-    <p>Here you will find information about me and my interests.</p>
-    <ul>
-      <li>Hiking</li>
-      <li>Cooking</li>
-      <li>Travel</li>
-    </ul>
-  </body>
+<!DOCTYPE HTML>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QC2GQV1130"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-QC2GQV1130');
+</script>
+
+  <title>Berker Demirel</title>
+  
+  <meta name="author" content="Berker Demirel">
+  <meta name="viewport" content="width=device-width, initial-scale=1">    
+  
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="icon" type="image/png" href="images/IDSIA_logo.png">
+</head>
+
+<body>
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+    <tr style="padding:0px"><td style="padding:0px">
+      <!-- Intro -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <tr style="padding:0px">
+          <td style="padding:2.5%;width:63%;vertical-align:middle">
+            <p style="text-align:center">
+              <name>Berker Demirel</name>
+            </p>
+            <p>
+              I am currently a MSc. student at the <a href="https://www.vpalab.com/">VPA Lab, Sabanci University</a>, working with
+              Asst. Prof. <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a>. My current research focuses on Group 
+              Activity Recognition in videos. I am also interested in topics domain generalization and out of distribution generalization
+              where statistical and information theoretical interpretations of the models are more pronounced.
+          </p>
+            <p>
+              During the summer of 2019, I did a summer internship at <a href="https://www.eur.nl/en">Erasmus University Rotterdam</a>.
+            </p>
+            
+            <p style="text-align:center">
+              <a href="mailto:berkerdemirel@sabanciuniv.edu">Email</a> &nbsp/&nbsp
+              <a href="./cv/00_Berker_Demirel_CV.pdf">CV</a> &nbsp/&nbsp
+              <a href="https://github.com/berkerdemirel/">GitHub</a> &nbsp/&nbsp
+              <a href="https://scholar.google.com/citations?user=MLkDw-MAAAAJ&hl=en&oi=ao">Google Scholar</a> &nbsp/&nbsp
+              <a href="https://twitter.com/WhyNotBerker">Twitter</a>
+            </p>
+          </td>
+          <td style="padding:2.5%;width:40%;max-width:40%">
+            <a href="./photos/photo.jpeg"><img style="width:100%;max-width:100%" alt="profile photo" src="./photos/photo.jpeg" class="hoverZoomLink"></a>
+          </td>
+        </tr>
+      </tbody></table>
+
+      <!-- Publications title -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <tr>
+          <td style="padding:20px;width:100%;vertical-align:middle">
+            <heading>Publications and Projects</heading>
+          </td>
+        </tr>
+      </tbody></table>
+        
+      <!-- List of publications and projects -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <!-- Vertex Ordering Algorithm for Graph Coloring Problem -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/graph_coloring.png" width="160">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://ieeexplore.ieee.org/abstract/document/9302296">
+              <papertitle>Vertex Ordering Algorithms for Graph Coloring Problem</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://www.linkedin.com/in/ardaasik/">Arda Asik</a>,
+            <a href="https://www.linkedin.com/in/bdemir97/">Bugra Demir</a>,
+            <a href="https://fens.sabanciuniv.edu/en/faculty-members/detail/2380">Kamer Kaya</a>,
+            <a href="https://www.linkedin.com/in/barisbatuhan/?originalSubdomain=tr">Baris Batuhan Topal</a>
+            <br>
+              <em> IEEE Signal Processing and Communications Applications (SIU), 2020 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2008.11454.pdf">pdf</a> /
+            <a href="https://github.com/barisbatuhan/Graph_Coloring_with_RL">code</a> /
+            <a href="./refs/voagcp.bib">bib</a>
+            <br>
+            <p>
+              We developed a ranking algorithm that uses metrics of degree 1/2/3, closeness centrality,
+              clustering coefficient, and page rank to rank the nodes in a graph. Then, we applied greedy coloring 
+              to the graph using the ranking as a guide, which resulted in significantly better colorings.
+              Furthermore, we tried to extend this idea using a model-free policy based reinforcement learning algorithm while 
+              parallelizing C++ backend using OpenMP.
+            </p>
+          </td>
+        </tr> 
+       
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/mnist.png" width="160">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://github.com/berkerdemirel/UMAP">
+              <papertitle>Implementation of UMAP in Python (Course Project)</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://arxiv.org/pdf/1802.03426.pdf">pdf</a> /
+            <a href="https://github.com/berkerdemirel/UMAP">code</a>
+            <br>
+            <p>
+              I implemented Uniform Manifold Approximation and Projection (UMAP) algorithm in Python from scratch 
+              and performed experiments on MNIST and Load Digits datasets.
+            </p>
+          </td>
+        </tr> 
+       
+        
+  <!-- Credits -->
+  <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+    <tr>
+      <td style="padding:0px">
+        <br>
+        <p style="text-align:right;font-size:small;">
+          Website template credits to <a href="https://robertcsordas.github.io/">Róbert Csordás</a>.
+        </p>
+      </td>
+    </tr>
+  </tbody></table>
+</body>
+
 </html>
