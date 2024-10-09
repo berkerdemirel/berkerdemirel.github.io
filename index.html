@@ -68,6 +68,96 @@
         
       <!-- List of publications and projects -->
       <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <!-- Look Around and Find Out: OOD Detection with Relative Angles -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/lafo.png" height="160" width="180">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2410.04525">
+              <papertitle>Look Around and Find Out: OOD Detection with Relative Angles</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2410.04525, 2024 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2410.04525">pdf</a> /
+            <a href="https://github.com/berkerdemirel/LAFO-Look-Around-and-Find-Out/">code</a> /
+            <a href="./refs/lafo.bib">bib</a>
+            <br>
+            <p>
+              We present a novel technique -Look Around and Find Out (LAFO)- for OOD detection, which computes the angles between the feature representation 
+              and its projection to the decision boundaries, relative to the mean of ID-features. LAFO is model-agnostic, hyperparameter-free, and efficient, 
+              scaling linearly with the number of ID-classes. Therefore, it can flexibly be combined with various architectures without the need for additional 
+              tuning. In addition, the scale-invariant property of LAFO allows for straightforward aggregation of confidence scores from multiple pre-trained 
+              models, improving ensemble performance for OOD detection.
+            </p>
+          </td>
+        </tr>
+        <!-- Adjusting Pretrained Backbones for Performativity -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/pap.png" height="100" width="180">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2410.04499">
+              <papertitle>Adjusting Pretrained Backbones for Performativity</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://csd.cmu.edu/people/doctoral-student/lingjing-kong">Lingjing Kong</a>,
+            <a href="https://www.andrew.cmu.edu/user/kunz1/">Kun Zhang</a>,
+            <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
+            <a href="https://celestine.ai/">Celestine Mendler-Dünner</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2410.04499, 2024 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2410.04499">pdf</a> /
+            <a href="https://github.com/berkerdemirel/Adjusting-Pretrained-Backbones-for-Performativity">code</a> /
+            <a href="./refs/pap.bib">bib</a>
+            <br>
+            <p>
+              We propose a modular approach to tackle performative label shift for pretrained backbones. This additional module serves two main use cases: 
+              (i) adapting the model for performative shift and (ii) making informed model selection by anticipating future distributions caused by multiple 
+              models. For the first use case, it allows pre-shift adaptation for networks to better handle performative shifts. For the second, it can 
+              anticipate a model's robustness to performative shifts, enabling more informative model selection. Thanks to our modeling approach capturing 
+              the inherent relationship between the sufficient statistic and the performative shift, it is not coupled with the specific architecture it is 
+              trained with. Therefore, it can seamlessly combine with various pretrained networks, allowing zero-shot transfer during model updates.
+            </p>
+          </td>
+        </tr>
+
+                <!-- DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image -->
+                <tr>
+                  <td style="padding:20px;width:25%;vertical-align:middle">
+                      <img src="./photos/DECOMPL.png" height="120" width="180">
+                  </td>
+                  <td style="padding:20px;width:75%;vertical-align:middle">
+                    <a href="https://arxiv.org/abs/2303.06439">
+                      <papertitle>DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image</papertitle>
+                    </a>
+                    <br>
+                    <strong>Berker Demirel</strong>,
+                    <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a>
+                    <br>
+                      <em> IEEE International Conference on Image Processing (ICIP), 2024 </em>
+                    <br>
+                    <a href="https://arxiv.org/pdf/2303.06439.pdf">pdf</a> /
+                    <a href="https://github.com/berkerdemirel/decompl">code</a> /
+                    <a href="./refs/decompl.bib">bib</a>
+                    <br>
+                    <p>
+                      We show that Group Activity Recognition Problem can be formulated using Attention Pooling mechanism and can perform on par with
+                      the other state-of-the-art methods even with a single RGB frame. Moreover, we manually reannotated the flawed instances in the Volleyball Dataset,
+                      which is one of the widely used datasets in Group Activity Recognition.
+                    </p>
+                  </td>
+                </tr>
+        
         <!-- ADRMX: Additive Disentanglement of Domain Features with Remix Loss -->
         <tr>
           <td style="padding:20px;width:25%;vertical-align:middle">
@@ -96,34 +186,6 @@
             </p>
           </td>
         </tr>
-
-        <!-- DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image -->
-        <tr>
-          <td style="padding:20px;width:25%;vertical-align:middle">
-              <img src="./photos/DECOMPL.png" height="120" width="180">
-          </td>
-          <td style="padding:20px;width:75%;vertical-align:middle">
-            <a href="https://arxiv.org/abs/2303.06439">
-              <papertitle>DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image</papertitle>
-            </a>
-            <br>
-            <strong>Berker Demirel</strong>,
-            <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a>,
-            <br>
-              <em> arXiv:2303.06439, 2023 </em>
-            <br>
-            <a href="https://arxiv.org/pdf/2303.06439.pdf">pdf</a> /
-            <a href="https://github.com/berkerdemirel/decompl">code</a> /
-            <a href="./refs/decompl.bib">bib</a>
-            <br>
-            <p>
-              We show that Group Activity Recognition Problem can be formulated using Attention Pooling mechanism and can perform on par with
-              the other state-of-the-art methods even with a single RGB frame. Moreover, we manually reannotated the flawed instances in the Volleyball Dataset,
-              which is one of the widely used datasets in Group Activity Recognition.
-            </p>
-          </td>
-        </tr>
-        
         
         <!-- Vertex Ordering Algorithm for Graph Coloring Problem -->
         <tr>
@@ -184,7 +246,7 @@
           </td>
           <td style="padding:20px;width:75%;vertical-align:middle">
             <a href="https://github.com/berkerdemirel/UMAP">
-              <papertitle>Implementation of UMAP in Python (Course Project)</papertitle>
+              <papertitle>Implementation of UMAP in Python</papertitle>
             </a>
             <br>
             <strong>Berker Demirel</strong>
@@ -199,45 +261,6 @@
           </td>
         </tr>
 
-        <tr>
-          <td style="padding:20px;width:25%;vertical-align:middle">
-              <img src="./photos/dcgan.png" width="180">
-          </td>
-          <td style="padding:20px;width:75%;vertical-align:middle">
-            <a href="https://github.com/berkerdemirel/Deep-Convolutional-Generative-Adversarial-Networks">
-              <papertitle>Implementation of DCGAN using PyTorch (Course Project)</papertitle>
-            </a>
-            <br>
-            <strong>Berker Demirel</strong>
-            <br>
-            <a href="https://arxiv.org/pdf/1511.06434.pdf">pdf</a> /
-            <a href="https://github.com/berkerdemirel/Deep-Convolutional-Generative-Adversarial-Networks">code</a>
-            <br>
-            <p>
-              I implemented convolutional Generator-Discriminator based GAN using PyTorch, and performed experiments on MNIST, CIFAR-10 and Celeb-A datasets.
-            </p>
-          </td>
-        </tr> 
-
-        <tr>
-          <td style="padding:20px;width:25%;vertical-align:middle">
-              <img src="./photos/EM.png" width="180">
-          </td>
-          <td style="padding:20px;width:75%;vertical-align:middle">
-            <a href="https://github.com/berkerdemirel/Expectation-Maximization-Algorithm">
-              <papertitle>Implementation of Expectation-Maximization Algorithm using Matlab (Course Project)</papertitle>
-            </a>
-            <br>
-            <strong>Berker Demirel</strong>
-            <br>
-            <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=543975">pdf</a> /
-            <a href="https://github.com/berkerdemirel/Expectation-Maximization-Algorithm">code</a>
-            <br>
-            <p>
-              I implemented Expectation-Maximization algorithm for Gaussian Mixture Model using Matlab.
-            </p>
-          </td>
-        </tr>
 
         <tr>
           <td style="padding:20px;width:25%;vertical-align:middle">
