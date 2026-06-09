@@ -72,6 +72,39 @@
         
       <!-- List of publications and projects -->
       <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <!-- Assessing Sample Quality in Conditional Generation under Compositional Shift -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/faithfulness_teaser.png" width="275" height="165">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2606.09601">
+              <papertitle>Assessing Sample Quality in Conditional Generation under Compositional Shift</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2606.09601, 2026 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2606.09601">pdf</a> /
+            <a href="https://github.com/berkerdemirel/faithful-cond-gen">code</a> /
+            <a href="./refs/faithful.bib">bib</a>
+            <br>
+            <p>
+              Conditional generators are most useful precisely where real samples are rare or unobserved, yet standard metrics like FID/KID
+              require a reference target distribution that is unavailable in this extrapolative regime. We introduce a post-hoc, per-sample
+              trust score that needs only the training distribution. The score combines global realism, measuring compatibility with the real
+              data manifold, and attribute-wise faithfulness, measuring whether a sample is closer to the requested attributes than to plausible
+              alternatives. This enables effective filtering, ranking, and abstention of generations on off-the-shelf pretrained models, and can
+              even be applied during generation to abstain before full decoding. In biological imaging and controlled vision benchmarks, selected
+              samples better preserve real structure and improve downstream predictive performance.
+            </p>
+          </td>
+        </tr>
         <!-- MorphGen -->
         <tr>
           <td style="padding:20px;width:25%;vertical-align:middle">
