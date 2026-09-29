@@ -72,6 +72,42 @@
         
       <!-- List of publications and projects -->
       <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <!-- λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/lambda_jepa_schematic.png" width="275">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2609.35288">
+              <papertitle>λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://clementinedomine.github.io/">Clémentine Dominé</a>,
+            <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="http://marcomondelli.com/">Marco Mondelli</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2609.35288, 2026 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2609.35288">pdf</a> /
+            <a href="https://github.com/berkerdemirel/lambda-jepa">code</a> /
+            <a href="./refs/lambdajepa.bib">bib</a>
+            <br>
+            <p>
+              Joint-embedding self-supervised methods pair an invariance objective across augmented views with a mechanism that prevents
+              representational collapse, but these objectives are usually applied after a projection head while downstream tasks use the
+              backbone representation before it. We find that this mismatch does not necessarily prevent dimensional collapse in the backbone,
+              which can retain low effective rank and limit transfer. We introduce SACReg, a spectral anti-collapse regularizer motivated by an
+              analysis of λ-balance, the relative scale of weight matrices across layers. In a two-layer linear network, λ-balance provably
+              prevents collapse and SACReg applied to the backbone induces λ-balance; in the nonlinear case it also prevents collapse and, in
+              realistic architectures on ImageNet100, empirically increases the rank of the representations. Applying SACReg to JEPA yields
+              λ-JEPA, which improves over LeJEPA and VISReg on ImageNet-1k classification and in average linear-probe transfer across eight
+              downstream image datasets, and over LeVJEPA and V-JEPA 2 on the Something-Something-v2 and Kinetics-400 video benchmarks.
+            </p>
+          </td>
+        </tr>
         <!-- Assessing Sample Quality in Conditional Generation under Compositional Shift -->
         <tr>
           <td style="padding:20px;width:25%;vertical-align:middle">
@@ -88,7 +124,7 @@
             <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
             <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
             <br>
-              <em> arXiv:2606.09601, 2026 </em>
+              <em> NeurIPS, 2026 </em>
             <br>
             <a href="https://arxiv.org/pdf/2606.09601">pdf</a> /
             <a href="https://github.com/berkerdemirel/faithful-cond-gen">code</a> /
@@ -120,7 +156,7 @@
             <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
             <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
             <br>
-              <em> arXiv:2510.01298, 2024 </em>
+              <em> NeurIPS, 2026 </em>
             <br>
             <a href="https://arxiv.org/pdf/2510.01298">pdf</a> /
             <a href="https://github.com/czi-ai/MorphGen">code</a> /
