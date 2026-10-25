@@ -104,4 +104,18 @@
       headings.forEach((h) => io.observe(h));
     }
   }
+
+  // ---- Collapsed technical details: open when a link points into them ---
+  const reveal = () => {
+    let id = '';
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch {}
+    const target = id ? document.getElementById(id) : null;
+    const details = target?.closest('details.deep-dive');
+    if (details && !details.open) {
+      details.open = true;
+      target.scrollIntoView();
+    }
+  };
+  window.addEventListener('hashchange', reveal);
+  reveal();
 })();

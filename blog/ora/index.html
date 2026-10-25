@@ -27,9 +27,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
   <style>
-    /* Post-specific: highlight the ORA column in the wide benchmark table. */
-    table.results td.ora-col, table.results th.ora-col { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--ink); }
+    /* Post-specific: tighter cells and group rows for the comparison and ablation tables. */
     table.results.is-dense th, table.results.is-dense td { padding: .45rem .55rem; }
+    table.results.is-dense td:first-child { white-space: normal; }
     table.results tr.group-row td { font-weight: 600; color: var(--ink-soft); background: var(--paper-2); }
   </style>
 </head>
@@ -82,29 +82,20 @@
         <div class="post-body">
           <div class="tldr">
             <span class="kicker">TL;DR</span>
-            <p>ORA is a post-hoc out-of-distribution score for any pretrained classifier. It projects a feature onto the decision boundaries, moves the origin to the mean of the in-distribution features, and reads off the angle between the feature and its projection: large for in-distribution inputs, small for out-of-distribution ones. The score has no hyperparameters and does not change when the feature space is rescaled, so scores from different models can simply be added. Across nine ImageNet backbones it has the lowest average FPR95 of the thirteen methods we compare.</p>
+            <p>Post-hoc out-of-distribution detectors often score an input by how far its feature lies from the classifier's decision boundaries, but distances change with the scale of the feature space. ORA measures an angle instead. Seen from the mean of the in-distribution features, a confident in-distribution feature and its projection onto the boundary form a wide angle, while an out-of-distribution feature, closer to the boundary, forms a narrow one. The angle needs no hyperparameters and is unchanged when features are rescaled, which makes it flexible: it is especially strong on contrastively trained features, and scores from different models can simply be added into an ensemble. Across a wide range of architectures, ORA is consistently competitive.</p>
           </div>
 
-          <h2 id="problem" data-toc="The problem">Knowing what the model does not know</h2>
-          <p>A classifier trained on a fixed set of labels will still produce a label for an image from a class it has never seen. A reliable system should notice this and abstain, which matters most in settings like medical diagnosis or driving. Out-of-distribution (OOD) detection asks exactly this: does an input come from the in-distribution \(P_{ID}\) the model was trained on, or from a distribution whose labels lie outside the training label set?</p>
-          <p>We focus on <em>post-hoc</em> detectors: score functions \(s(x; f)\) computed from an already trained model \(f\), without retraining. An input is accepted as in-distribution when its score clears a threshold \(\lambda\), and in the standard FPR95 metric \(\lambda\) is set so that 95% of held-out ID data is accepted; FPR95 is then the fraction of OOD inputs that slip through.</p>
-          <p>Post-hoc scores roughly come in two families. Logit-based scores such as maximum softmax probability or the energy score read the model's confidence off its outputs, and inherit the overconfidence of neural networks. Feature-based scores work in the penultimate feature space, for example through nearest-neighbour distances or through the distance of a feature to the decision boundaries. The boundary view is appealing: OOD inputs do not carry strong evidence for any class, so they should sit closer to the boundaries than ID inputs. The fDBD score of Liu and Qin builds on this idea and normalizes the boundary distance by the distance to the ID mean. Our derivation below shows that this normalization introduces a factor that does not help separate ID from OOD, and that removing it leaves a clean geometric quantity: an angle.</p>
-
-          <h2 id="method" data-toc="The idea">A triangle in feature space</h2>
-          <p>Write the network as a feature extractor followed by a linear head, \(g(z) = Wz + b\), where \(z \in \mathbb{R}^D\) is the penultimate feature. The decision boundary between two classes \(y_1\) and \(y_2\) is the hyperplane where their logits tie, \((w_{y_1}-w_{y_2})^\top z + b_{y_1}-b_{y_2} = 0\), and projecting a feature onto it has a closed form:</p>
-          <div class="eq">$$z_{db} = z - \frac{(w_{y_1}-w_{y_2})^\top z + (b_{y_1}-b_{y_2})}{\lVert w_{y_1}-w_{y_2}\rVert^2}\,(w_{y_1}-w_{y_2}) \tag{1}$$</div>
-          <p>The angle between \(z\) and \(z_{db}\) is a natural measure of how far a feature is from changing its label, but measured from the origin it depends on an arbitrary choice of reference point. We remove that ambiguity by moving the origin to the mean of the in-distribution features, \(\mu_{ID}\). The centered feature \(z-\mu_{ID}\), its centered projection \(z_{db}-\mu_{ID}\), and the new origin form a triangle, and we use the angle at the origin, the <em>relative angle</em>:</p>
-          <div class="eq">$$\theta_{y_1,y_2}(z) = \arccos\left(\frac{\langle z-\mu_{ID},\; z_{db}-\mu_{ID}\rangle}{\lVert z-\mu_{ID}\rVert\,\lVert z_{db}-\mu_{ID}\rVert}\right) \tag{2}$$</div>
-          <p>With many classes, a feature has one boundary per competitor of its predicted class \(\hat y = \arg\max_y g(z)\). ORA takes the largest relative angle among them, the boundary that is furthest away as seen from the ID mean:</p>
-          <div class="eq">$$s(z) = \max_{y' \in \mathcal{Y},\; y' \neq \hat y}\; \theta_{\hat y, y'}(z) \tag{3}$$</div>
+          <h2 id="idea" data-toc="The idea">A triangle in feature space</h2>
+          <p>A classifier trained on a fixed set of labels will still put a label on an image from a class it has never seen. Out-of-distribution (OOD) detection asks it to notice instead. We look for a <em>post-hoc</em> score: one computed from an already trained network, without retraining, that is high for in-distribution (ID) inputs and low for everything else.</p>
+          <p>The decision boundaries suggest where to look. An OOD input carries no strong evidence for any class, so its feature should sit closer to a boundary than a typical ID feature does. Write the network as a feature extractor followed by a linear head \(g(z) = Wz + b\). The boundary between the predicted class \(\hat y\) and a competitor \(y'\) is the hyperplane where their logits tie, and projecting the penultimate feature \(z\) onto it gives a closed-form point \(z_{db}\).</p>
+          <p>The distance from \(z\) to \(z_{db}\) depends on how the feature space happens to be scaled, and an angle measured from the origin depends on where the origin happens to be. We remove both by moving the origin to the mean of the ID features, \(\mu_{ID}\). The centered feature, its centered projection and the new origin form a triangle, and the score is the angle at the origin, the <em>relative angle</em>:</p>
+          <div class="eq">$$\theta_{\hat y,y'}(z) = \arccos \frac{\langle z-\mu_{ID},\, z_{db}-\mu_{ID}\rangle}{\lVert z-\mu_{ID}\rVert\,\lVert z_{db}-\mu_{ID}\rVert}$$</div>
+          <p>ORA takes the largest of these angles over all competitors \(y'\), the boundary that is furthest away as seen from the ID mean. A feature deep inside its class forms a wide angle, because changing its label would be costly; one that drifts toward a boundary forms a narrow one.</p>
 
           <figure class="fig is-wide">
             <div class="plate"><img src="fig-geometry.png" alt="Two panels. Left: an in-distribution feature near its class cluster, its projection onto the boundary, and a wide angle at the ID mean. Right: an OOD feature closer to the boundary and a narrow angle." width="1580" height="710" loading="lazy"></div>
             <figcaption><b>Figure 1.</b> Geometry of ORA for an in-distribution feature (a) and an out-of-distribution feature (b). The angle at the ID mean between the feature and its projection onto the decision boundary is larger for ID data: \(\theta_{ID} > \theta_{OOD}\). From the paper.</figcaption>
           </figure>
-
-          <p>Four properties make this a useful score. The angle grows with the distance between the feature and the boundary, so it acts as a proxy for confidence: changing an ID feature's label is costly. Centering on \(\mu_{ID}\) builds the statistics of the training data into the score. Taking the maximum over boundaries looks at the class the feature is furthest from. And because it is an angle, the score does not change when the feature space is scaled, which we come back to below. ORA has no hyperparameters, so given a pretrained model it is fully deterministic.</p>
-          <p>The sketch below is a two-class version of Figure 1. Drag the feature around: deep inside a class the angle is wide, and it collapses as the feature drifts toward the boundary. The scale slider shows the invariance directly.</p>
 
           <figure class="viz fig is-wide" data-viz="ora">
             <div class="viz-stage">
@@ -135,101 +126,78 @@
               <button class="btn" type="button" data-place="c2">Inside C2</button>
               <label>Feature scale <input type="range" min="50" max="160" value="100" aria-label="Scale of the feature space"> <output>×1.00</output></label>
             </div>
-            <figcaption><strong>Where does the model's knowledge end?</strong> ORA projects a feature z onto the decision boundary (z<sub>db</sub>) and measures the angle between the two as seen from the mean of the in-distribution features, μ<sub>ID</sub>. Features the classifier is confident about form large angles; features that drift toward the boundary form small ones, and anything below the threshold that keeps 95% of training features is flagged as out-of-distribution. Drag z to try it. A two-class sketch after Figure 1 of the paper; with more classes ORA takes the largest angle over the boundaries of the predicted class.</figcaption>
           </figure>
 
-          <h2 id="why" data-toc="Why angles">Why angles, and why the ID mean</h2>
-          <p>The relative angle also explains fDBD. fDBD divides the distance to the boundary by the distance to the ID mean, \(d(z, z_{db}) / \lVert z-\mu_{ID}\rVert\). Both lengths are sides of our triangle, so by the law of sines</p>
-          <div class="eq">$$\mathrm{fDBD}(z) = \frac{d(z-\mu_{ID},\, z_{db}-\mu_{ID})}{d(z-\mu_{ID},\, 0)} = \frac{\sin\theta}{\sin\alpha} \tag{4}$$</div>
-          <p>where \(\theta\) is our relative angle and \(\alpha\) is the angle opposite the side \(z-\mu_{ID}\). The extra factor \(\sin\alpha\) is tied to the magnitude of the feature relative to \(\mu_{ID}\), which need not say anything about whether an input is OOD. Figure 2 shows that its distributions for CIFAR-10 and an OOD dataset (Texture) overlap heavily, so dropping it and keeping \(\theta\) alone removes noise from the score.</p>
+          <h2 id="why" data-toc="Why angles">What the angle buys</h2>
+          <p>Given a pretrained model, ORA is fully determined: there is nothing to tune. It is also scale-invariant in a precise sense. If one encoder's features are a scaled copy of another's, \(z_{M_2} = k\, z_{M_1}\) with \(k &gt; 0\), and both share a bias-free linear head, the two models make the same decisions and have identical relative angles, while their distances to the boundary differ by the factor \(k\) (Appendix C of the paper). Distance-based scores from different networks live on different scales; ORA scores can be compared, and added, directly.</p>
+          <p>The triangle also explains the closest earlier score, fDBD of Liu and Qin, which divides the distance to the boundary by the distance to the ID mean. Both lengths are sides of our triangle, and fDBD turns out to combine our angle with another angle of the same triangle, one whose values barely differ between ID and OOD data. Dropping that second angle leaves the relative angle (<a href="#details">details below</a>).</p>
 
-          <figure class="fig">
-            <div class="plate"><img src="fig-sin-alpha.png" alt="Overlapping histograms of sin(alpha) for CIFAR-10 (in) and Texture (out), concentrated between 0.892 and 0.900." width="1116" height="702" loading="lazy"></div>
-            <figcaption><b>Figure 2.</b> Histogram of \(\sin\alpha\) for ID (CIFAR-10) and OOD (Texture) samples. The two distributions overlap heavily, so the factor that fDBD adds is not informative for separating them. From the paper.</figcaption>
-          </figure>
-
-          <p>Scale invariance has a precise form. If one encoder's features are a scaled copy of another's, \(z_{M_2} = k\, z_{M_1}\) for some \(k > 0\), and both share the same linear head without bias, the two models make the same decisions, their relative angles are identical, and their distances to the boundary differ by the factor \(k\) (Appendix C of the paper). Distance-based scores from different networks therefore live on different scales, while ORA scores are directly comparable. This is what makes ensembling as simple as summing scores.</p>
-          <p>The two design choices also hold up in ablations. Centering on the global ID mean beats centering on the predicted-class mean, the true-class mean, or the maximum of the ID features, and taking the maximum angle over boundaries beats taking the mean or the minimum.</p>
+          <h2 id="results" data-toc="Results">How it holds up</h2>
+          <p>Most ImageNet OOD benchmarks report a ResNet-50 alone. We compare ORA with twelve other post-hoc scores on nine backbones instead, convolutional and transformer, trained on ImageNet alone or pretrained on larger data, including a ResNet-50 trained with a supervised contrastive loss (SCL).</p>
 
           <div class="table-wrap">
             <table class="results is-dense">
-              <caption>Ablations on the CIFAR-10 and ImageNet OOD benchmarks, from Tables 6 and 7 of the paper. FPR95 in %, lower is better; AUROC in %, higher is better.</caption>
+              <caption>FPR95 (%, lower is better): the share of OOD images that pass when the threshold keeps 95% of ID data, averaged over iNaturalist, SUN, Places365 and Texture. Three of the nine backbones are shown, plus the average over all nine. Bold marks the best of all thirteen methods in each column. From Table 1 of the paper, which has the <a href="https://openreview.net/pdf?id=ul5mlXrLZb">full comparison</a>.</caption>
               <thead>
-                <tr><th></th><th colspan="2" style="text-align:center">CIFAR-10</th><th colspan="2" style="text-align:center">ImageNet</th></tr>
-                <tr><th>Variant</th><th>FPR95 ↓</th><th>AUROC ↑</th><th>FPR95 ↓</th><th>AUROC ↑</th></tr>
+                <tr><th rowspan="2" scope="col">Method</th><th colspan="2" scope="colgroup" style="text-align:center">ResNet-50</th><th rowspan="2" scope="col">EVA</th><th rowspan="2" scope="col">Average</th></tr>
+                <tr><th scope="col">plain</th><th scope="col">SCL</th></tr>
               </thead>
               <tbody>
-                <tr class="group-row"><td colspan="5">Centering point</td></tr>
-                <tr><td>Predicted-class mean \(\mu_{y_{pred}}\)</td><td>12.42</td><td>97.59</td><td>43.02</td><td>89.86</td></tr>
-                <tr><td>True-class mean \(\mu_{y_{target}}\)</td><td>13.26</td><td>97.48</td><td>28.29</td><td>93.46</td></tr>
-                <tr><td>Maximum of ID features</td><td>13.39</td><td>97.42</td><td>32.44</td><td>92.01</td></tr>
-                <tr class="is-ours"><td>ID mean \(\mu_{ID}\) (ORA)</td><td class="best">10.97</td><td class="best">97.67</td><td class="best">25.04</td><td class="best">94.26</td></tr>
-                <tr class="group-row"><td colspan="5">Aggregation over boundaries</td></tr>
-                <tr><td>Minimum</td><td>32.02</td><td>95.23</td><td>79.15</td><td>81.38</td></tr>
-                <tr><td>Mean</td><td>11.84</td><td>97.59</td><td>32.76</td><td>92.87</td></tr>
-                <tr class="is-ours"><td>Maximum (ORA)</td><td class="best">10.97</td><td class="best">97.67</td><td class="best">25.04</td><td class="best">94.26</td></tr>
+                <tr><td>MSP</td><td>66.95</td><td>50.06</td><td>43.75</td><td>54.78</td></tr>
+                <tr><td>R-Mah</td><td>83.29</td><td>77.52</td><td class="best">27.45</td><td>49.50</td></tr>
+                <tr><td>P-Cos</td><td>45.53</td><td>31.57</td><td>27.68</td><td>41.52</td></tr>
+                <tr><td>fDBD</td><td>51.19</td><td>32.78</td><td>36.10</td><td>43.90</td></tr>
+                <tr class="is-ours"><td>ORA</td><td class="best">43.63</td><td class="best">25.04</td><td>33.37</td><td class="best">38.34</td></tr>
               </tbody>
             </table>
           </div>
 
-          <h2 id="results" data-toc="Results">What we found</h2>
-          <p>Most OOD benchmarks on ImageNet are reported for a ResNet-50 alone. We evaluated nine backbones instead: ConvNeXt, Swin, DeiT and EVA, the ImageNet-21k pretrained variants of the first three where available, a ResNet-50, and a ResNet-50 trained with supervised contrastive learning (SCL). We compare ORA against twelve post-hoc scores. The threshold is set on 50,000 ImageNet validation images, and iNaturalist, SUN, Places365 and Texture serve as OOD data.</p>
+          <p>No score wins everywhere, ORA included. What sets it apart is consistency: it has the best average over the nine backbones, while scores that shine on one backbone can fall apart on another.</p>
+          <p>ORA is at its strongest on contrastively trained features, which arrange the space so that classes are well separated, and there it is the best detector on both CIFAR-10 and ImageNet. It also carries over to CLIP, with a linear probe or zero-shot, where the text embeddings of two classes define the boundary between them; zero-shot it is competitive but not the best.</p>
+          <p>Because the angle does not depend on scale, scores from different networks can be summed directly, and an ensemble of three models beats its best member. ORA also combines with activation-shaping methods such as ReAct, which lower its error further.</p>
 
-          <div class="table-wrap fig is-wide">
-            <table class="results is-dense">
-              <caption>Average FPR95 (%, lower is better) over the four OOD datasets of the ImageNet benchmark, from Table 1 of the paper. Bold marks the lowest value in each row.</caption>
-              <thead>
-                <tr><th>Model</th><th>MSP</th><th>MaxL</th><th>Energy</th><th>R-Mah</th><th>R-Cos</th><th>P-Cos</th><th>NNG</th><th>KNN+</th><th>fDBD</th><th>NCI</th><th>Maha+</th><th>NECO</th><th class="ora-col">ORA</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>ConvNeXt</td><td>63.54</td><td>60.69</td><td>78.70</td><td>45.79</td><td>46.99</td><td>49.37</td><td>39.54</td><td>47.40</td><td>39.03</td><td>36.44</td><td>36.68</td><td class="best">34.52</td><td class="ora-col">34.92</td></tr>
-                <tr><td>ConvNeXt-pre</td><td>45.57</td><td>42.39</td><td>46.95</td><td>34.91</td><td>36.16</td><td>35.47</td><td>76.91</td><td>77.23</td><td>42.13</td><td>50.48</td><td>37.50</td><td>34.40</td><td class="ora-col best">29.53</td></tr>
-                <tr><td>Swin</td><td>61.99</td><td>59.21</td><td>65.78</td><td class="best">45.25</td><td>46.26</td><td>49.37</td><td>57.34</td><td>53.79</td><td>52.34</td><td>57.25</td><td>48.21</td><td>58.24</td><td class="ora-col">51.56</td></tr>
-                <tr><td>Swin-pre</td><td>46.20</td><td>40.86</td><td>42.33</td><td>39.40</td><td>35.66</td><td class="best">33.94</td><td>44.06</td><td>51.34</td><td>38.92</td><td>39.63</td><td>42.67</td><td>36.49</td><td class="ora-col">35.13</td></tr>
-                <tr><td>DeiT</td><td>57.48</td><td>57.52</td><td>70.05</td><td>52.51</td><td class="best">47.63</td><td>61.62</td><td>58.02</td><td>71.34</td><td>55.98</td><td>58.11</td><td>54.18</td><td>58.49</td><td class="ora-col">54.16</td></tr>
-                <tr><td>DeiT-pre</td><td>57.45</td><td>54.72</td><td>55.56</td><td>39.37</td><td>38.49</td><td>39.11</td><td>43.56</td><td>44.18</td><td>46.69</td><td>57.76</td><td>38.68</td><td>52.61</td><td class="ora-col best">37.76</td></tr>
-                <tr><td>EVA</td><td>43.75</td><td>40.37</td><td>43.40</td><td class="best">27.45</td><td>27.94</td><td>27.68</td><td>37.33</td><td>34.19</td><td>36.10</td><td>39.34</td><td>31.11</td><td>36.05</td><td class="ora-col">33.37</td></tr>
-                <tr><td>ResNet-50</td><td>66.95</td><td>64.29</td><td>58.41</td><td>83.29</td><td>59.51</td><td>45.53</td><td>55.22</td><td>53.97</td><td>51.19</td><td>63.03</td><td>49.67</td><td>56.62</td><td class="ora-col best">43.63</td></tr>
-                <tr><td>ResNet-50 (SCL)</td><td>50.06</td><td>97.59</td><td>98.46</td><td>77.52</td><td>48.18</td><td>31.57</td><td>98.80</td><td>38.47</td><td>32.78</td><td>96.02</td><td>45.06</td><td>97.58</td><td class="ora-col best">25.04</td></tr>
-                <tr class="is-ours"><td>Average</td><td>54.78</td><td>57.52</td><td>62.18</td><td>49.50</td><td>42.98</td><td>41.52</td><td>56.75</td><td>52.43</td><td>43.90</td><td>55.34</td><td>42.64</td><td>51.67</td><td class="ora-col best">38.34</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <h2 id="limits" data-toc="Limitations">Where it falls short</h2>
+          <p>ORA needs decision boundaries. It is defined for models with a linear classification head, or for vision-language models whose text embeddings can stand in for one; a plain feature extractor has nothing to project onto.</p>
+          <p>Near-OOD is harder for every method. On NINCO and SSB-Hard, where OOD images look like ID classes, all scores lose separability, no single one is clearly best, and methods built on class centroids tend to do better at the cost of storing per-class statistics. ORA, which uses only the global ID mean, is competitive with them (Appendix I of the paper). Centering on per-class means instead gave no consistent gains; a data-driven weighting of per-class angles that keeps the score hyperparameter-free is the natural next step.</p>
 
-          <p>ORA has the lowest average FPR95, 38.34%, which is 3.18 points below the runner-up, P-Cos at 41.52%. It also gives the single lowest number in the table, 25.04% on the SCL ResNet-50, against 27.45% for the best competitor anywhere (R-Mah on EVA). Per backbone, the picture is more varied: ORA is lowest on four of the nine models and second on two more, while R-Mah, R-Cos, P-Cos and NECO each win elsewhere. No competitor is consistently strong, though, and several that win on one backbone fail badly on another; the SCL ResNet-50 row is the clearest example.</p>
+          <details class="deep-dive">
+            <summary><h2 id="details" data-toc="Technical details">Technical details</h2></summary>
+            <div class="deep-dive-body">
+              <h3>Projecting onto a boundary</h3>
+              <p>The boundary between classes \(y_1\) and \(y_2\) is \((w_{y_1}-w_{y_2})^\top z + b_{y_1}-b_{y_2} = 0\), where \(w_y\) and \(b_y\) are the rows of \(W\) and entries of \(b\). Projecting a feature onto it gives</p>
+              <div class="eq">$$z_{db} = z - \frac{(w_{y_1}-w_{y_2})^\top z + (b_{y_1}-b_{y_2})}{\lVert w_{y_1}-w_{y_2}\rVert^2}\,(w_{y_1}-w_{y_2}).$$</div>
+              <p>For zero-shot CLIP, the boundary between classes with text embeddings \(z_{c_1}, z_{c_2}\) is the set of normalized features equally similar to both. With \(u = (z_{c_1}-z_{c_2})/\lVert z_{c_1}-z_{c_2}\rVert\), the projection is \(z_{db} = z - \langle z, u\rangle u\).</p>
 
-          <h3>Contrastive features help</h3>
-          <p>The SCL row hints at a pattern. Contrastive objectives arrange the feature space so that semantic concepts are well separated, and ORA benefits from that structure. With SCL-trained backbones, ORA has the lowest FPR95 on both CIFAR-10 (ResNet-18) and ImageNet (ResNet-50), going from 11.85% to 10.97% and from 32.78% to 25.04% relative to the best competitor, fDBD (Table 3 of the paper).</p>
-          <p>CLIP is contrastive across modalities. With a linear probe on CLIP ViT-H/14 features, ORA reaches 23.94% average FPR95 and the highest average AUROC of the methods we ran, 95.03%. CLIP also lets us drop the trained head entirely: the boundary between two classes can be defined by the text embeddings \(z_{c_1}, z_{c_2}\), as the set of normalized features equally similar to both. With \(u = (z_{c_1}-z_{c_2})/\lVert z_{c_1}-z_{c_2}\rVert\), the projection is simply \(z_{db} = z - \langle z, u\rangle u\). This zero-shot ORA reaches 25.85% FPR95; the lowest average FPR95 in that comparison belongs to zero-shot R-Mah, at 22.57% (Table 2 of the paper).</p>
+              <h3>fDBD and the law of sines</h3>
+              <p>Distances are translation-invariant, so both lengths in the fDBD score are sides of the triangle formed by \(z-\mu_{ID}\), \(z_{db}-\mu_{ID}\) and the origin. By the law of sines,</p>
+              <div class="eq">$$\mathrm{fDBD}(z) = \frac{\lVert z - z_{db}\rVert}{\lVert z-\mu_{ID}\rVert} = \frac{\sin\theta}{\sin\alpha},$$</div>
+              <p>with \(\theta\) the relative angle and \(\alpha\) the angle opposite \(z-\mu_{ID}\).</p>
+              <figure class="fig">
+                <div class="plate"><img src="fig-sin-alpha.png" alt="Overlapping histograms of sin(alpha) for CIFAR-10 (in) and Texture (out), concentrated between 0.892 and 0.900." width="1116" height="702" loading="lazy"></div>
+                <figcaption><b>Figure 2.</b> Histogram of \(\sin\alpha\) for ID (CIFAR-10) and OOD (Texture) samples. The two distributions overlap heavily, so the factor that fDBD adds is not informative for separating them. From the paper.</figcaption>
+              </figure>
 
-          <h3>Ensembles by addition</h3>
-          <p>Because ORA scores are comparable across models, an ensemble is just the sum of the scores of its members. Summing ORA over a ResNet-50, an SCL ResNet-50 and a ViT-B/16 lowers FPR95 by 2.51 points and raises AUROC by 2.15 points compared to the best member on its own.</p>
-
-          <div class="table-wrap">
-            <table class="results">
-              <caption>Ensembling by score summation on the ImageNet OOD benchmark, from Table 4 of the paper. fDBD is also scale-invariant (Eq. 4), so it is included for comparison.</caption>
-              <thead><tr><th>Score and model</th><th>FPR95 ↓</th><th>AUROC ↑</th></tr></thead>
-              <tbody>
-                <tr><td>fDBD, ResNet-50</td><td>51.35</td><td>89.20</td></tr>
-                <tr><td>fDBD, ResNet-50 (SCL)</td><td>32.78</td><td>92.86</td></tr>
-                <tr><td>fDBD, ViT-B/16</td><td>41.55</td><td>91.05</td></tr>
-                <tr><td>fDBD ensemble</td><td>31.05</td><td>95.29</td></tr>
-                <tr><td>ORA, ResNet-50</td><td>44.58</td><td>90.68</td></tr>
-                <tr><td>ORA, ResNet-50 (SCL)</td><td>25.04</td><td>94.26</td></tr>
-                <tr><td>ORA, ViT-B/16</td><td>39.92</td><td>91.38</td></tr>
-                <tr class="is-ours"><td>ORA ensemble</td><td class="best">22.53</td><td class="best">96.41</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p>ORA also composes with activation-shaping methods, which truncate or rescale features before scoring. Applying ORA after ReAct reduces FPR95 from 25.04% to 20.36%, and ASH and Scale bring it to 23.47% and 23.34% (Table 5 of the paper).</p>
-
-          <h2 id="limits" data-toc="Limitations">Limitations</h2>
-          <ul>
-            <li><strong>ORA needs decision boundaries.</strong> It is defined for models with a linear classification head. For vision-language models the zero-shot construction above replaces the head with text embeddings, but a plain feature extractor without either has no boundaries to project onto.</li>
-            <li><strong>Near-OOD is harder for everyone.</strong> On NINCO and SSB-Hard, where OOD images are visually close to ID classes, all methods lose separability and no single one is clearly best. Methods built on class centroids tend to do better there, at the cost of storing per-class statistics; ORA, which uses only the global ID mean, is competitive with them (Appendix I of the paper).</li>
-            <li><strong>One reference point.</strong> We tested centering on per-class means and on the predicted-class mean and found no consistent gains. A data-driven weighting of per-class angles, for example by class-wise feature variance or accuracy, is a natural next step that would keep the score hyperparameter-free.</li>
-          </ul>
+              <h3>Ablations</h3>
+              <p>Centering on the global ID mean beats centering on the predicted-class mean, the true-class mean, or the maximum of the ID features, and taking the maximum angle over boundaries beats the mean or the minimum.</p>
+              <div class="table-wrap">
+                <table class="results is-dense">
+                  <caption>Ablations on the CIFAR-10 and ImageNet OOD benchmarks: FPR95 (%, lower is better). From Tables 6 and 7 of the paper, which also report AUROC.</caption>
+                  <thead><tr><th scope="col">Variant</th><th scope="col">CIFAR-10</th><th scope="col">ImageNet</th></tr></thead>
+                  <tbody>
+                    <tr class="group-row"><td colspan="3">Centering point</td></tr>
+                    <tr><td>Predicted-class mean</td><td>12.42</td><td>43.02</td></tr>
+                    <tr><td>True-class mean</td><td>13.26</td><td>28.29</td></tr>
+                    <tr><td>Maximum of ID features</td><td>13.39</td><td>32.44</td></tr>
+                    <tr class="is-ours"><td>ID mean (ORA)</td><td class="best">10.97</td><td class="best">25.04</td></tr>
+                    <tr class="group-row"><td colspan="3">Aggregation over boundaries</td></tr>
+                    <tr><td>Minimum</td><td>32.02</td><td>79.15</td></tr>
+                    <tr><td>Mean</td><td>11.84</td><td>32.76</td></tr>
+                    <tr class="is-ours"><td>Maximum (ORA)</td><td class="best">10.97</td><td class="best">25.04</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
 
           <h2 id="cite">Citation</h2>
           <div class="cite">

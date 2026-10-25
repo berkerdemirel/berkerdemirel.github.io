@@ -114,6 +114,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scrollbar-gutter: stable;
 }
 
@@ -1126,6 +1127,47 @@ input[type="range"] {
   padding: .25rem 0;
 }
 
+/* Optional technical depth, collapsed by default. The h2 sits inside the summary so the
+   section still appears in the table of contents; site.js opens it when linked to. */
+.post-body .deep-dive {
+  margin-top: 2.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.deep-dive > summary {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .85rem 1.15rem;
+  cursor: pointer;
+  list-style: none;
+}
+.deep-dive > summary::-webkit-details-marker { display: none; }
+.deep-dive > summary::before {
+  content: '';
+  flex: none;
+  width: .45rem;
+  height: .45rem;
+  border-right: 1.5px solid var(--ink-faint);
+  border-bottom: 1.5px solid var(--ink-faint);
+  transform: rotate(-45deg);
+  transition: transform .15s ease;
+}
+.deep-dive[open] > summary::before { transform: rotate(45deg); }
+.deep-dive > summary:hover::before { border-color: var(--accent); }
+.post-body .deep-dive > summary h2 {
+  margin: 0 !important;
+  font-size: 1.15rem;
+}
+.deep-dive-body { padding: 0 1.15rem 1.2rem; }
+.deep-dive-body > * { margin-top: 0; margin-bottom: 0; }
+.deep-dive-body > * + * { margin-top: 1.05rem; }
+.deep-dive-body > h3:first-child { margin-top: .4rem !important; }
+@media (prefers-reduced-motion: reduce) {
+  .deep-dive > summary::before { transition: none; }
+}
+
 /* Figures inside posts can break out of the text column */
 .fig {
   margin-inline: 0;
@@ -1138,6 +1180,8 @@ input[type="range"] {
   background: var(--figure-bg);
 }
 .fig .plate img { display: block; margin-inline: auto; }
+/* Square plots read fine smaller than the column */
+.fig.is-narrow .plate img { width: 100%; max-width: 28rem; }
 .fig figcaption {
   margin-top: .6rem;
   font-size: .92rem;
