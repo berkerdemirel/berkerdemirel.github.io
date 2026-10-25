@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>λ-JEPA · Berker Demirel</title>
+  <meta name="description" content="Anti-collapse objectives keep the projected space high-rank but can leave the backbone collapsed. SACReg, derived from λ-balance in linear networks, regularizes the backbone directly; λ-JEPA improves image and video self-supervised learning.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/lambda-jepa/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning">
+  <meta property="og:description" content="Preventing collapse after the projector does not prevent it in the backbone. SACReg regularizes the backbone spectrum directly.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/lambda-jepa/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/lambda-jepa/poster.jpg">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
+</head>
+<body class="is-wide is-post" style="--hue: #58c4dd">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../../">About</a>
+        <a href="../../research/">Research</a>
+        <a href="../../publications/">Publications</a>
+        <a href="../" aria-current="page">Blog</a>
+        <a href="../../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <article>
+      <header class="post-head">
+        <p class="kicker"><span class="dot"></span><a href="../../research/#representation">Representation learning</a><span aria-hidden="true">·</span><span>arXiv 2026</span></p>
+        <h1>λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning</h1>
+        <p class="authors"><span class="me">Berker Demirel</span>*, <a href="https://clementinedomine.github.io/">Clémentine Dominé</a>*, <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>, <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>, <a href="http://marcomondelli.com/">Marco Mondelli</a>, <a href="https://www.francescolocatello.com/">Francesco Locatello</a></p>
+        <p class="affil">Institute of Science and Technology Austria (ISTA) · * equal contribution</p>
+        <div class="res">
+          <a class="is-primary" href="https://arxiv.org/abs/2609.35288">paper</a>
+          <a href="https://github.com/berkerdemirel/lambda-jepa">code</a>
+          <a href="#cite">cite</a>
+        </div>
+      </header>
+
+      <figure class="teaser">
+        <div class="frame">
+          <video src="teaser.mp4" poster="poster.jpg" controls muted loop playsinline preload="metadata" data-autoplay aria-label="Teaser video: augmented views pass through the backbone and projector; the backbone representation collapses until SACReg spreads the image centers apart."></video>
+        </div>
+        <figcaption>Teaser · 33 s · muted</figcaption>
+      </figure>
+
+      <div class="post-layout">
+        <aside class="post-toc" aria-label="On this page"><nav><p>On this page</p><ol></ol></nav></aside>
+        <div class="post-body">
+          <div class="tldr">
+            <span class="kicker">TL;DR</span>
+            <p>Explicitly regularized joint-embedding methods prevent collapse in the projected space, but the backbone representation that downstream tasks actually use can stay low-rank. A two-layer linear analysis shows that a negative layer balance (λ-balance) keeps the encoder full rank, and suggests a regularizer that drives training toward it. We turn this into SACReg, a covariance penalty on view-averaged backbone features, and build λ-JEPA on top of it. It improves over LeJEPA and VISReg on ImageNet-1k linear probing and transfer, and over LeVJEPA and V-JEPA 2 on Something-Something-v2 and Kinetics-400.</p>
+          </div>
+
+          <h2 id="problem" data-toc="The problem">Collapse hides behind the projector</h2>
+          <p>Joint-embedding self-supervised learning (JE-SSL) asks the representations of two augmented views of an image to agree, and adds some mechanism that stops the network from satisfying this trivially by mapping everything to the same point. That mechanism can be contrastive negatives, an asymmetric teacher and student, or an explicit regularizer. We focus on the explicit family: VICReg controls the variance and covariance of the embeddings, LeJEPA pushes them toward an isotropic Gaussian, and VISReg combines variance regularization with a distributional constraint.</p>
+          <p>All three act on the projected representation \(z\), the output of a small nonlinear head. After pretraining, that head is thrown away and downstream tasks use the backbone representation \(h\) that feeds it. With a nonlinear projector, a well-spread \(z\) says little about \(h\). The paper gives a two-line example: if \(h = (X, 0)^\top\) with \(X\) uniform on \(\{-1, 0, 1\}\) and \(p(h) = (h_1, |h_1|)^\top\), then \(\mathrm{Cov}(h)\) has rank one while \(\mathrm{Cov}(p(h)) = \mathrm{diag}(2/3, 2/9)\) has full rank.</p>
+          <p>This is not only a toy concern. Figure 1 compares the two spaces for VICReg, VISReg, and LeJEPA. Views of the same image agree in both spaces, but different images look alike in the backbone: negative-pair cosine similarity is 0.47 to 0.71 there and essentially zero after the projector. RankMe, which measures how evenly variance is spread across feature directions, tells the same story. For LeJEPA it is 1.00 (normalized by dimension) in the projected space and 0.07 in the backbone.</p>
+
+          <figure class="fig">
+            <div class="plate"><img src="fig-geometry.png" alt="Three bar charts comparing backbone h and loss space z for VICReg, VISReg and LeJEPA. Positive-pair cosine is high in both spaces. Negative-pair cosine is 0.71, 0.47 and 0.58 in the backbone but about zero in z. RankMe divided by dimension is 0.39, 0.06 and 0.07 in the backbone versus 0.27, 0.77 and 1.00 in z." width="1404" height="666" loading="lazy"></div>
+            <figcaption><b>Figure 1.</b> Backbone and loss-space geometry for explicitly regularized JE-SSL methods. The projection head changes both pairwise similarities and RankMe. From the paper.</figcaption>
+          </figure>
+
+          <p>Why care? A good representation should be task-agnostic, keeping the information that downstream tasks need, and easily probeable, keeping it readable with a simple probe (the <a href="../../research/#representation">research page</a> has a small sketch of both). Dimensional collapse works against both. A low-rank backbone offers fewer feature directions to whatever task comes next, and different tasks can rely on different directions: what is squeezed into a vanishing direction is either lost or too faint for a linear probe to pick up. Effective rank has also been shown to predict downstream performance in JE-SSL (Garrido et al., 2023).</p>
+          <p>The sketch below shows the mismatch in a 16-dimensional toy: the projected spectrum stays flat while the backbone spectrum decays.</p>
+
+          <figure class="viz fig is-wide" data-viz="collapse">
+            <div class="viz-stage">
+              <div class="viz-panel">
+                <h3>Backbone representations</h3>
+                <canvas data-role="scatter" role="img" aria-label="Scatter plot of backbone embeddings: image centers and their augmented views, projected onto the top two directions."></canvas>
+                <ul class="viz-legend">
+                  <li><span class="sw" style="color: var(--accent)"></span>image (view average)</li>
+                  <li><span class="sw is-ring" style="color: var(--accent)"></span>augmented views</li>
+                </ul>
+              </div>
+              <div class="viz-panel">
+                <h3>Singular value spectrum</h3>
+                <canvas data-role="spectrum" role="img" aria-label="Bar chart of the singular value spectrum of the backbone h and the projector output z."></canvas>
+                <ul class="viz-legend">
+                  <li><span class="sw is-bar" style="color: var(--series-1)"></span>backbone h</li>
+                  <li><span class="sw is-bar is-ring" style="color: var(--series-2)"></span>projector z</li>
+                </ul>
+                <div class="viz-readout" aria-live="polite">
+                  <span>effective rank h <b data-read="rank-h">–</b> / 16</span>
+                  <span>z <b data-read="rank-z">–</b> / 16</span>
+                  <span>SACReg(H̄) <b data-read="sacreg">–</b></span>
+                </div>
+              </div>
+            </div>
+            <div class="viz-controls">
+              <button class="btn" type="button" data-role="play" aria-pressed="false"></button>
+              <label>Training <input type="range" min="0" max="100" value="100" aria-label="Training progress"> <output>100%</output></label>
+              <div class="seg" role="group" aria-label="Objective">
+                <button type="button" data-value="baseline" aria-pressed="true">Projector only</button>
+                <button type="button" data-value="sacreg" aria-pressed="false">+ SACReg on backbone</button>
+              </div>
+            </div>
+            <figcaption><strong>Collapse hides in the backbone.</strong> Joint-embedding methods usually prevent collapse after the projector, so the projected spectrum stays flat while the backbone spectrum can decay to a handful of directions. Switching on SACReg, which applies ½[‖μ‖² + tr Σ − log det Σ − d] to view-averaged backbone features, penalizes vanishing directions and keeps the backbone high-rank. A 16-dimensional toy, not trained weights.</figcaption>
+          </figure>
+
+          <h2 id="balance" data-toc="λ-balance">A lesson from linear networks</h2>
+          <p>Where should anti-collapse act, and in what form? The feature-learning literature has a tractable model for questions about representation rank: the two-layer linear network \(\hat y = W_2 W_1 x\), trained with a squared loss. The end-to-end map \(M = W_2 W_1\) is linear, but how it is split across the two layers shapes the dynamics. That split is summarized by the layer-imbalance matrix</p>
+          <div class="eq">$$\Delta = W_2^\top W_2 - W_1 W_1^\top,$$</div>
+          <p>and the network is called λ-balanced when \(\Delta = \lambda I\). Under plain gradient flow \(\Delta\) is conserved, so the balance stays wherever initialization put it.</p>
+          <p>The key observation is that a <em>negative</em> balance is an anti-collapse guarantee. If \(\Delta = \lambda_{\text{bal}} I\) with \(\lambda_{\text{bal}} &lt; 0\), then \(W_1 W_1^\top \succeq -\lambda_{\text{bal}} I\), so the encoder has full row rank. If the input covariance is bounded below, \(\Sigma_x \succeq \kappa_x I\), the hidden representations \(h = W_1 x\) inherit the bound: \(C_h = W_1 \Sigma_x W_1^\top \succeq -\kappa_x \lambda_{\text{bal}} I\).</p>
+          <p>Initializing deep nonlinear networks with a prescribed negative balance is not straightforward, so instead we ask for an objective that selects the balance during training. Among all factorizations of a fixed map \(M\), the minimizer of weight decay plus a log-determinant on the encoder Gram matrix is exactly balanced (Theorem 3.1). The penalty</p>
+          <div class="eq">$$\mathcal{R}_{\text{LSAC}}(W_1, W_2) = \frac{\lambda_{\text{reg}}}{2}\left(\|W_1\|_F^2 + \|W_2\|_F^2\right) - \frac{\gamma}{2}\log\det W_1 W_1^\top,$$</div>
+          <p>minimized subject to \(W_2 W_1 = M\), has a solution that satisfies</p>
+          <div class="eq">$$W_2^\top W_2 - W_1 W_1^\top = -\frac{\gamma}{\lambda_{\text{reg}}}\, I.$$</div>
+          <p>The same balance also emerges dynamically. Under regularized gradient flow, the task-loss terms cancel in the evolution of the imbalance, which gives \(\Delta(t) + \tfrac{\gamma}{\lambda_{\text{reg}}} I = e^{-2\lambda_{\text{reg}} t/\tau}\big(\Delta(0) + \tfrac{\gamma}{\lambda_{\text{reg}}} I\big)\). Whatever the dataset and the starting point, the network converges exponentially to a \(-\gamma/\lambda_{\text{reg}}\)-balanced solution and stays there. The ratio \(\gamma/\lambda_{\text{reg}}\) sets the balance, and with it the lower bound on the encoder spectrum; \(\lambda_{\text{reg}}\) sets how fast training gets there. Two things carry over from this analysis: the form of the penalty (a log-determinant that punishes vanishing directions, plus a scale control) and its placement (on the encoder side, not after the head).</p>
+
+          <h2 id="sacreg" data-toc="SACReg">From weights to representations</h2>
+          <p>In nonlinear networks the imbalance is no longer conserved, although it still influences learning. Rather than relying on exact balance dynamics, we apply the same spectral principle to the covariance of the encoder's outputs. For a minibatch of representations with mean \(\mu\) and centered covariance \(C_h\), nonlinear SACReg is</p>
+          <div class="eq">$$\mathcal{R}_{\text{SAC}}(\mu, C_h) = \frac{\lambda_{\text{mean}}}{2}\|\mu\|_2^2 + \frac{\lambda_{\text{cov}}}{2}\operatorname{tr}(C_h) - \frac{\gamma}{2}\log\det\left(C_h + \varepsilon I\right).$$</div>
+          <p>Each term has one job. The mean penalty centers the representation, the trace bounds its total variance, and the negative log-determinant penalizes small covariance eigenvalues. Its unique minimizer is \(\mu^\star = 0\) with isotropic covariance \(C_h^\star = (\gamma/\lambda_{\text{cov}} - \varepsilon)_+ I\) (Theorem 3.4). With \(\varepsilon = 0\), the log-determinant is a strict barrier: the regularizer blows up as the smallest eigenvalue goes to zero, the trace term does the same as the largest one grows, and the mean term prevents escape by drifting. For a linear encoder with whitened inputs, the covariance part reduces exactly to the encoder portion of the linear regularizer. In small ReLU networks the regularizer raises representation rank across initialization scales and promotes feature learning (Fig. 4 in the appendix), and in a ViT trained with SACReg the backbone representations and the empirical NTK move substantially away from initialization, consistent with rich learning dynamics (Fig. 5).</p>
+
+          <h2 id="objective" data-toc="λ-JEPA">λ-JEPA</h2>
+          <p>To use SACReg in self-supervised learning we need to decide what it should spread out. For a batch of \(B\) images with \(V\) augmented views each, let \(h_i^{(j)} = f_\theta(v_i^{(j)})\) and \(z_i^{(j)} = p_\phi(h_i^{(j)})\), and average over views to get image centers \(\bar h_i\) and \(\bar z_i\). Regularizing the centers rather than individual views makes SACReg encourage variation <em>between images</em>, not between augmentations of the same image. For a batch of centers \(R\) with mean \(\mu_R\) and covariance \(\Sigma_R\) (Definition 3.5),</p>
+          <div class="eq">$$\operatorname{SACReg}(R) = \frac{1}{2}\left[\|\mu_R\|_2^2 + \operatorname{tr}(\Sigma_R) - \log\det\left(\Sigma_R + \varepsilon I_d\right) - d\right].$$</div>
+          <p>For \(\varepsilon = 0\) this is the KL divergence from \(\mathcal{N}(\mu_R, \Sigma_R)\) to \(\mathcal{N}(0, I)\). The λ-JEPA objective puts it in both spaces (Eq. 3):</p>
+          <div class="eq">$$\mathcal{L}_{\lambda\text{-JEPA}} = \mathcal{L}_{\text{SSL}}(Z) + \beta_h \operatorname{SACReg}(\bar H) + \beta_z \operatorname{SACReg}(\bar Z).$$</div>
+          <p>The invariance term \(\mathcal{L}_{\text{SSL}}\) is simply the mean squared distance between all pairs of projected views, with no negatives. The projected-space term provides anti-collapse where the SSL loss is optimized; the backbone term protects the representation kept for transfer. When SACReg is added to an existing method that already has its own projected-space mechanism, we leave that objective untouched and add only \(\beta_h \operatorname{SACReg}(\bar H)\).</p>
+          <p>Two practical details matter. When the feature dimension exceeds the number of image centers in a batch, the covariance is rank-deficient, so the regularizer is evaluated on random orthogonal lower-dimensional slices that are redrawn at every step. And loss weights are set by a gradient-based rule rather than a sweep: when SACReg is added to an existing method, \(\beta_h\) is chosen so the backbone term contributes a fixed share of the total gradient pull on the backbone, without per-method tuning (DINO is the one exception; Appendix C.3).</p>
+
+          <h2 id="results" data-toc="Results">What we found</h2>
+          <h3>Images: ImageNet-1k and transfer</h3>
+          <p>We pretrain ViT-S and ViT-B from scratch on ImageNet-1k and evaluate frozen features with a linear probe on ImageNet-1k and the average linear-probe accuracy over eight transfer datasets (DTD, Aircraft, Cars, CIFAR-10, CIFAR-100, Flowers, Food, Pets).</p>
+          <div class="table-wrap">
+            <table class="results">
+              <caption>ImageNet-1k linear probe and mean linear-probe transfer over eight datasets (%), 100 epochs. From Table 1a of the paper.</caption>
+              <thead><tr><th scope="col">Method</th><th scope="col">Backbone</th><th scope="col">IN-1k linear</th><th scope="col">Transfer</th></tr></thead>
+              <tbody>
+                <tr><td>LeJEPA</td><td>ViT-S/16</td><td>62.5</td><td>68.7</td></tr>
+                <tr><td>DINO</td><td>ViT-S/16</td><td>70.0</td><td>75.7</td></tr>
+                <tr><td>iBOT</td><td>ViT-S/16</td><td class="best">70.9</td><td>75.9</td></tr>
+                <tr class="is-ours"><td>λ-JEPA</td><td>ViT-S/16</td><td>69.7</td><td class="best">77.6</td></tr>
+                <tr><td>LeJEPA</td><td>ViT-B/16</td><td>69.7</td><td>74.2</td></tr>
+                <tr><td>DINO</td><td>ViT-B/16</td><td>73.9</td><td>78.3</td></tr>
+                <tr><td>iBOT</td><td>ViT-B/16</td><td class="best">77.0</td><td>80.7</td></tr>
+                <tr><td>VISReg</td><td>ViT-B/16</td><td>70.3</td><td>76.4</td></tr>
+                <tr class="is-ours"><td>λ-JEPA</td><td>ViT-B/16</td><td>74.2</td><td class="best">80.9</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>At matched training length, λ-JEPA improves substantially over the other explicitly regularized methods. The gains are largest on transfer: 8.9 points over LeJEPA with ViT-S and 4.5 points over VISReg with ViT-B. For both model sizes it has the highest average transfer among the 100-epoch results, and its ImageNet-1k accuracy approaches DINO and iBOT, methods that JEPA-style models have so far trailed by a wide margin.</p>
+          <p>Training longer helps without any retuning (Table 1b). At 400 epochs, ViT-B reaches 76.0% linear and 82.0% average transfer, 2.9 points above the 400-epoch VISReg result and within 1.2 points of DINO and iBOT. ViT-S reaches 79.3% transfer, essentially matching DINO and iBOT trained for 300 epochs. The paper is careful to treat these as context rather than matched comparisons, since the public checkpoints use different training lengths.</p>
+
+          <h3>Video: SSv2 and Kinetics-400</h3>
+          <p>For video we change only the loss inside the LeVJEPA training pipeline and keep the model, optimizer, and data unchanged. Frozen encoders are evaluated on ImageNet-1k, Something-Something-v2 (temporal reasoning), and Kinetics-400 (action recognition).</p>
+          <div class="table-wrap">
+            <table class="results">
+              <caption>Video SSL, frozen evaluation (%). “Longer training” is 1,085 epochs for LeVJEPA and λ-JEPA. λ-JEPA is evaluated with a probe on the CLS representation, which SACReg regularizes; LeVJEPA uses an attentive probe on IN-1k and SSv2 and a linear probe on mean-pooled features on K400. From Table 2 of the paper.</caption>
+              <thead><tr><th scope="col">Method</th><th scope="col">IN-1k</th><th scope="col">SSv2</th><th scope="col">K400</th></tr></thead>
+              <tbody>
+                <tr class="group"><th colspan="4" scope="colgroup">ViT-S/16, 240 epochs</th></tr>
+                <tr><td>LeVJEPA</td><td>39.4</td><td>—</td><td>—</td></tr>
+                <tr><td>V-JEPA 2</td><td>38.7</td><td>—</td><td>—</td></tr>
+                <tr class="is-ours"><td>λ-JEPA</td><td class="best">46.8</td><td>37.3</td><td>40.0</td></tr>
+                <tr class="group"><th colspan="4" scope="colgroup">ViT-B/16, 240 epochs</th></tr>
+                <tr><td>VideoMAEv2</td><td>47.1</td><td>—</td><td>—</td></tr>
+                <tr><td>V-JEPA 2</td><td>51.6</td><td>—</td><td>—</td></tr>
+                <tr><td>LeVJEPA</td><td>50.7</td><td>30.4</td><td>—</td></tr>
+                <tr class="is-ours"><td>λ-JEPA</td><td class="best">52.9</td><td class="best">43.9</td><td>44.2</td></tr>
+                <tr class="group"><th colspan="4" scope="colgroup">ViT-B/16, longer training</th></tr>
+                <tr><td>VideoMAEv2</td><td>53.4</td><td>43.6</td><td>37.4</td></tr>
+                <tr><td>V-JEPA 2</td><td>51.6</td><td>42.5</td><td>40.7</td></tr>
+                <tr><td>LeVJEPA</td><td class="best">61.0</td><td>40.4</td><td>44.6</td></tr>
+                <tr class="is-ours"><td>λ-JEPA</td><td>57.1</td><td class="best">48.3</td><td class="best">45.7</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The clearest gains are on temporal evaluations. With ViT-B, λ-JEPA improves over LeVJEPA on SSv2 by 13.5 points at 240 epochs and by 7.9 points at 1,085 epochs, and it is the best of the four methods on Kinetics-400 after longer training. At 240 epochs it also beats LeVJEPA and V-JEPA 2 on ImageNet-1k for both model sizes; after longer training, LeVJEPA's attentive-probe ImageNet-1k number is higher.</p>
+
+          <h3>A controlled look across SSL objectives</h3>
+          <p>To isolate the effect of the backbone term, we take six existing methods on ImageNet-100 (LeJEPA, VICReg, VISReg, SimCLR, DINO, BYOL), keep each objective and recipe unchanged, and add only \(\beta_h \operatorname{SACReg}(\bar H)\). All runs use ViT-S/16 for 100 epochs and are averaged over three seeds.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-imagenet100.png" alt="Dumbbell plots for VICReg, SimCLR, BYOL, DINO, LeJEPA, VISReg and λ-JEPA on ImageNet-100, comparing baseline (open circles) with SACReg added at the backbone (green). RankMe increases, positive- and negative-pair cosines decrease, and linear-probe and kNN accuracy increase. Below, per-method panels show class-center separability and view sensitivity both increasing under SACReg." width="1600" height="1220" loading="lazy"></div>
+            <figcaption><b>Figure 2.</b> Effect of backbone SACReg across SSL objectives on ImageNet-100. Top: backbone statistics and downstream evaluation. Bottom: class-center separability versus view sensitivity along class-prediction directions. Open and green markers are the baseline and +SACReg; for λ-JEPA the baseline sets \(\beta_h = 0\). From the paper.</figcaption>
+          </figure>
+
+          <p>The change is consistent across objectives. At the backbone, RankMe increases substantially for every method and the cosine geometry becomes less concentrated: negative-pair similarities approach zero, and positive-pair similarities generally decrease too. The corresponding statistics in the projection space change much less, so SACReg mostly reshapes the backbone without getting in the way of learning after the head. kNN accuracy improves for all methods and linear-probe accuracy improves as well, with smaller gains for VICReg. Since positive pairs become <em>less</em> similar, the gains do not come from extra invariance.</p>
+          <p>So what do the recovered directions encode? We separate variation between images, \(B_h = \mathrm{Cov}(\mathbb{E}[h \mid Q])\) for a source image \(Q\), from variation across its views, \(A_h = \mathbb{E}[\mathrm{Cov}(h \mid Q)]\), and measure two things along each class's prediction direction: how separable the class centers are, and how sensitive the representation is to the view. Under SACReg all six methods gain on both, so the improvement is not bought by suppressing augmentation-dependent variation. For λ-JEPA, class-center separability improves for 96 of 100 classes, while view sensitivity moves in both directions.</p>
+          <p>Is any anti-collapse objective at the backbone enough? Appendix D tests this by adding LeJEPA's own SIGReg directly to its encoder output. It fixes several Gaussianity diagnostics (negative-pair cosine drops from 0.58 to 0.01), but the spectrum stays concentrated, with RankMe/d moving only from 0.07 to 0.09, and downstream accuracy gets worse (linear probe 60.4% → 58.9%, kNN 52.4% → 48.1%). Controlling the covariance spectrum directly, as the log-determinant does, is what matters here.</p>
+
+          <h2 id="takeaways" data-toc="Takeaways">Takeaways and limitations</h2>
+          <ul>
+            <li><strong>Check the representation you deploy.</strong> Anti-collapse constraints on the projected space do not carry through a nonlinear head, and the backbone can stay low-rank.</li>
+            <li><strong>Negative layer balance is an anti-collapse mechanism.</strong> In two-layer linear networks it lower-bounds the encoder spectrum, and weight decay plus a log-determinant drives training toward it from any initialization.</li>
+            <li><strong>SACReg carries that principle to nonlinear encoders</strong> as a covariance penalty on view-averaged backbone features. Added to six different SSL objectives, it consistently raises backbone rank and downstream accuracy.</li>
+            <li><strong>λ-JEPA</strong> brings an explicitly regularized JEPA close to DINO and iBOT on images, with the best 100-epoch transfer, and extends off the shelf to video with large gains on SSv2.</li>
+          </ul>
+          <p>SACReg currently regularizes CLS tokens computed from global views. Extending it to patch-level features and local crops is not straightforward: local views add much more augmentation-induced variation, which makes view centers noisy and, in our experiments, made training unstable. Getting this right could help dense prediction tasks. The 400-epoch image and 1,085-epoch video runs reuse hyperparameters from shorter runs because of compute limits.</p>
+
+          <h2 id="cite">Citation</h2>
+          <div class="cite">
+            <button class="btn copy" type="button" data-copy="bibtex">Copy</button>
+<pre id="bibtex">@misc{demirel2026lambdajepa,
+      title={$\lambda$-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning},
+      author={Berker Demirel and Clémentine Dominé and Valentino Maiorca and Marco Fumero and Marco Mondelli and Francesco Locatello},
+      year={2026},
+      eprint={2609.35288},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2609.35288},
+}</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/site.js" defer></script>
+  <script src="../../assets/js/research-viz.js" defer></script>
+</body>
+</html>

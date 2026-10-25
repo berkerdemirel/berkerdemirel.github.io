@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DECOMPL · Berker Demirel</title>
+  <meta name="description" content="DECOMPL recognizes volleyball group activities from a single RGB frame and player boxes, using attention pooling over players and a coordinate branch, and comes with corrected Volleyball dataset labels.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/decompl/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image">
+  <meta property="og:description" content="Group activity recognition from one RGB frame: attention pooling over players, a coordinate branch over their boxes, and corrected Volleyball labels.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/decompl/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/decompl/poster.jpg">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
+</head>
+<body class="is-wide is-post" style="--hue: #fc6255">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../../">About</a>
+        <a href="../../research/">Research</a>
+        <a href="../../publications/">Publications</a>
+        <a href="../" aria-current="page">Blog</a>
+        <a href="../../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <article>
+      <header class="post-head">
+        <p class="kicker"><span class="dot"></span><a href="../../publications/">Earlier work</a><span aria-hidden="true">·</span><span>Group activity recognition</span><span aria-hidden="true">·</span><span>ICIP 2024</span></p>
+        <h1>DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image</h1>
+        <p class="authors"><span class="me">Berker Demirel</span>, <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a></p>
+        <p class="affil">Sabanci University</p>
+        <div class="res">
+          <a class="is-primary" href="https://arxiv.org/abs/2303.06439">paper</a>
+          <a href="https://github.com/berkerdemirel/decompl">code</a>
+          <a href="#cite">cite</a>
+        </div>
+      </header>
+
+      <figure class="teaser">
+        <div class="frame">
+          <video src="teaser.mp4" poster="poster.jpg" controls muted loop playsinline preload="metadata" data-autoplay></video>
+        </div>
+        <figcaption>Teaser · 45 s · muted</figcaption>
+      </figure>
+
+      <div class="post-layout">
+        <aside class="post-toc" aria-label="On this page"><nav><p>On this page</p><ol></ol></nav></aside>
+        <div class="post-body">
+          <div class="tldr">
+            <span class="kicker">TL;DR</span>
+            <p>Group activity recognition models usually process whole clips, often with optical flow or pose keypoints on top of RGB. DECOMPL drops time: it classifies the activity from one RGB frame plus the players' bounding boxes, combining attention-pooled player features with a branch that only looks at where the players stand. It needs about a tenth of the FLOPs of the next-cheapest method in our comparison, and while doing so we found and corrected systematic labeling flaws in the Volleyball dataset.</p>
+          </div>
+
+          <h2 id="problem">The problem</h2>
+          <p>Group activity recognition (GAR) asks what a group of people is doing together in a short video clip. In volleyball, a label such as <em>left spike</em> or <em>right pass</em> describes the team, not any single player. Even when the decision hinges on one key player, that player's action only makes sense relative to the configuration and actions of everyone else on the court.</p>
+          <p>Most prior work models this jointly in space and time. Methods feed RGB frames through recurrent networks, relation modules, graph networks or transformers, and the strongest ones add optical flow, pose keypoints or ball trajectories. Each of those additions improves accuracy, and each adds computation.</p>
+          <p>We asked a simpler question. A player's pose and the spatial arrangement of the players are static in a single image, yet they are known to be highly predictive of the action unfolding over time. So, conditioned on good spatial information, how much does GAR in volleyball actually lose if we drop the temporal dimension altogether?</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-overview.jpg" alt="A volleyball frame with player bounding boxes labeled Right Spike; arrows lead to a visual attention sum over cropped players and to a spatial configuration of colored dots, both feeding into the group activity." width="1564" height="480" loading="lazy"></div>
+            <figcaption><b>Figure 1.</b> The idea in one picture. From a single frame, an attention mechanism weighs the visual features of individual players, and a separate branch models their spatial configuration from the box coordinates alone. Both feed the group activity decision (adapted from the paper).</figcaption>
+          </figure>
+
+          <h2 id="one-frame">Betting on a single frame</h2>
+          <p>DECOMPL treats each frame independently. During training it uniformly samples a single frame from the clip and makes the group activity decision from that frame's visual and coordinate features. At test time it makes an independent decision for every frame and simply averages them. No frame gets special weight and frames are never considered jointly, so the model does no temporal modeling at all. It also uses no optical flow, keypoints or pose estimates: the inputs are the RGB image and the players' boxes, which the Volleyball benchmark provides.</p>
+
+          <h2 id="method">Two branches</h2>
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-architecture.png" alt="Architecture diagram. A sampled frame goes into a visual branch (backbone, RoI align, left and right multi-head attention pooling, concatenation, visual side, activity and team classifiers) and a coordinate branch (box coordinates, coordinate module, attention pooling, coordinate side, activity and team classifiers). Visual and coordinate decisions are fused with weights lambda s, lambda g and lambda t into side, group and team activity labels." width="2040" height="876" loading="lazy"></div>
+            <figcaption><b>Figure 2.</b> Overview of DECOMPL. The visual branch extracts player features with a VGG backbone and RoI align, splits them into the two teams and pools each team with multi-head attention. The coordinate branch models the interactions between players from their box coordinates and summarizes them with attention pooling. Each branch predicts side, group and team activity, and the predictions are fused with learnable weights \(\lambda_s, \lambda_g, \lambda_t\) (adapted from the paper).</figcaption>
+          </figure>
+
+          <h3>Visual branch</h3>
+          <p>A VGG backbone produces a feature map of the frame, and RoI align pools a feature for every player box, projected to \(D = 128\) dimensions. That gives \(X \in \mathbb{R}^{N \times D}\) with \(N = 12\) players. To capture team-level structure we sort the players by the x-coordinate of their boxes and split the list into a left team and a right team. Each team is summarized by its own multi-head attention pooling module, giving \(X_l, X_r \in \mathbb{R}^D\), and the frame's visual feature \(X_{\text{visual}}\) is their concatenation.</p>
+
+          <h3>Attention pooling</h3>
+          <p>A scene summary should reflect the important players more than the rest. Max pooling makes a hard, index-wise selection, and mean pooling cannot weigh key players, so the summary ends up with a low signal-to-noise ratio. There is also no natural order for players on a court, so the pooling must be permutation invariant. We adopt the attention-based pooling from multiple instance learning (Ilse et al., 2018), which is trainable, permutation invariant, and assigns each player a weight according to their contribution. For embeddings \(X = \{x_1, \dots, x_N\}\),</p>
+          <div class="eq">$$X_{\text{pooled}} = \sum_{i=1}^{N} a_i\, x_i, \qquad a_i = \frac{\exp\{w^\top \tanh(V x_i^\top)\}}{\sum_{j=1}^{N} \exp\{w^\top \tanh(V x_j^\top)\}},$$</div>
+          <p>where \(w \in \mathbb{R}^{L \times 1}\), \(V \in \mathbb{R}^{L \times D}\) and \(L\) is the hidden dimension. The coordinate branch uses this module as is; the visual branch stacks several heads and projects their outputs back to \(D\) dimensions. To our knowledge this was the first use of multi-head MIL attention pooling for GAR.</p>
+
+          <h3>Coordinate branch</h3>
+          <p>The second branch never sees pixels. It takes the box coordinates \(X_b \in \mathbb{R}^{N \times 4}\), sorts them from left to right, and forms the pairwise difference vectors between players, \(X_{pd} \in \mathbb{R}^{N \times N \times 4}\). A convolution with kernel size 4 and stride 4 maps each difference vector to a single number with shared weights, further convolutions extract higher-level structure, and a projection gives location features in \(\mathbb{R}^{N \times D}\). A single attention pooling over all players, without splitting them into teams since only relative positions matter here, yields \(X_{\text{coordinate}} \in \mathbb{R}^D\). Because it is independent of the visual features, this branch runs concurrently with the first one.</p>
+
+          <h3>Decomposing the label</h3>
+          <p>Volleyball labels have a mirror symmetry across the two sides of the net, and DECOMPL uses it to add auxiliary tasks. Besides the side-sensitive group activity (for example <em>left spike</em>), each clip also gets a side label (left or right) and a sideless team activity (pass, set, spike, win), on top of the individual action labels. Individual actions are predicted from the per-player RoI features; side, team activity and group activity are each predicted from both \(X_{\text{visual}}\) and \(X_{\text{coordinate}}\), and the two branches' decisions are fused with learnable weights \(\lambda_s, \lambda_g, \lambda_t\). Without visual information the model cannot tell players apart, and without coordinates it is blind to their relative positions, so both are needed. The network is trained end to end with</p>
+          <div class="eq">$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{individual}} + \mathcal{L}_{\text{group}} + \beta\,(\mathcal{L}_{\text{side}} + \mathcal{L}_{\text{team}}),$$</div>
+          <p>with \(\beta = 1\) for the Volleyball dataset.</p>
+
+          <h2 id="labels" data-toc="Fixing the labels">Fixing the Volleyball labels</h2>
+          <p>Working with the Volleyball dataset (VD), the benchmark most of the GAR literature reports on, we noticed that many clips, especially <em>set</em> and <em>pass</em>, were labeled mostly by the pose of the main player. A clip was a <em>pass</em> if the main player was bumping, no matter where the ball went next. That reduces the task to pose recognition and loses the group concept the label is supposed to capture.</p>
+          <p>We re-annotated the dataset with group-level semantics. A <em>spike</em> sends the ball to the other side in a comfortable, attacking position. A ball returned defensively, or a touch by the first player after the opponent's last touch, is a <em>pass</em>. A <em>set</em> forwards the ball to the player who is going to spike it. Win-point and the left/right distinction had no systematic flaw, but we also fixed random errors such as side mismatches.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-reannotation.jpg" alt="Two volleyball frames with colored player boxes, numbered action order and the ball trajectory drawn in green." width="1620" height="476" loading="lazy"></div>
+            <figcaption><b>Figure 3.</b> Examples of systematic labeling flaws in the original VD. Numbers give the order of actions and the main players are in yellow boxes. (a) is annotated <em>right pass</em>, but the group activity is setting up the spikers, so we relabel it <em>right set</em>. (b) is annotated <em>left set</em>, but the actor is the first to touch the ball after the opponent's spike, so it is a <em>left pass</em> (adapted from the paper).</figcaption>
+          </figure>
+
+          <p>After removing 9 clips whose camera angle changes, the refined dataset has 4821 clips, and we changed 497 labels, about 10% of the data. Of those, 381 follow from the group-level labeling scheme and 116 (about 2.4%) correct random errors, 29 of them side mismatches.</p>
+
+          <h2 id="results">What we found</h2>
+          <p>On the original VD labels, DECOMPL reaches 93.8% group activity accuracy. That is the second-best result among RGB-only methods, 0.3 points behind the best one, and comparable to most keypoint methods and several methods that combine RGB, optical flow and keypoints. Since the original labels contain errors, we also re-ran the methods with public code on our corrected labels.</p>
+
+          <div class="table-wrap">
+            <table class="results">
+              <caption>Group activity accuracy (%) on the Volleyball dataset with the original labels (paper Table 2) and our corrected labels (paper Table 3, methods re-run from public code). GroupFormer is its RGB-only variant; “–” means not reported in that setting. Bold marks the best RGB-only result in each column.</caption>
+              <thead><tr><th>Method</th><th>Input</th><th>Original</th><th>Corrected</th></tr></thead>
+              <tbody>
+                <tr><td>SACRF</td><td>RGB</td><td>90.7</td><td>92.8</td></tr>
+                <tr><td>DIN</td><td>RGB</td><td>93.6</td><td>94.3</td></tr>
+                <tr><td>GroupFormer</td><td>RGB</td><td class="best">94.1</td><td>94.45</td></tr>
+                <tr><td>COMPOSER</td><td>Keypoint</td><td>94.6</td><td>96.26</td></tr>
+                <tr><td>COMPOSER w/o ball</td><td>Keypoint</td><td>–</td><td>94.39</td></tr>
+                <tr class="is-ours"><td>DECOMPL</td><td>RGB</td><td>93.8</td><td class="best">95.2</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>With corrected labels, DECOMPL reaches 95.2%, the best among the RGB-only methods and 0.9 points above DIN. Only COMPOSER, which uses keypoints and ball trajectories, is higher; without the ball tracklets COMPOSER falls to 94.39%. DECOMPL also gains the most from the correction: 1.4 points, compared with 0.7 for DIN and 0.35 for GroupFormer. All methods improve with the corrected labels, which is itself a sign that the original ones were holding the benchmark back.</p>
+          <p>On the Collective Activity dataset, a different domain with no team structure, we use a single multi-head attention block instead of one per team. DECOMPL reaches 95.5%, 0.9 points above the best RGB-only result and third overall behind two methods that use keypoints or mixed inputs (paper Table 2). This dataset is harder for a single-frame model: <em>waiting</em> and <em>moving</em> are easy to confuse without motion.</p>
+
+          <h3>Cost</h3>
+          <p>Excluding the backbone and embedding layers, as in prior comparisons, DECOMPL needs 0.031 GFLOPs per forward pass and has 0.65M parameters (paper Table 4). The next-lightest method in FLOPs, DIN, needs 0.311 GFLOPs with 1.305M parameters, and COMPOSER needs 0.777 GFLOPs with 11.102M parameters. Modeling time costs computation and parameters; dropping it cuts FLOPs to about 10% of the nearest competitor.</p>
+
+          <h3>Ablations</h3>
+          <div class="table-wrap">
+            <table class="results">
+              <caption>Ablations on the corrected VD validation set, averaged over 5 runs (paper Table 5).</caption>
+              <thead><tr><th>Variant</th><th>Accuracy</th></tr></thead>
+              <tbody>
+                <tr><td>Coordinate module only (no pixels)</td><td>73.5</td></tr>
+                <tr><td>Without the coordinate module</td><td>94.8</td></tr>
+                <tr><td>Without the auxiliary losses</td><td>94.7</td></tr>
+                <tr><td>Max pooling instead of attention</td><td>94.6</td></tr>
+                <tr><td>Mean pooling instead of attention</td><td>94.7</td></tr>
+                <tr class="is-ours"><td>DECOMPL</td><td class="best">95.2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The coordinate module alone, which only sees where the players stand, already reaches 73.5% without looking at a single pixel. Removing it costs 0.4 points, removing the auxiliary side and team losses costs 0.5, and replacing attention pooling with mean or max pooling costs 0.5 to 0.6. Two attention heads work best (95.2%, versus 94.8% with one head and 94.7–94.8% with four or eight; paper Table 6).</p>
+
+          <h2 id="takeaways" data-toc="Takeaways">Takeaways and limits</h2>
+          <ul>
+            <li>For volleyball, most of the group activity signal is already in a single frame: who stands where and how the key players are posed. Dropping temporal modeling cost little accuracy and saved most of the computation.</li>
+            <li>Where the players are is informative on its own. A pixel-free branch over box coordinates gets 73.5% and still adds to the visual branch.</li>
+            <li>Benchmarks deserve scrutiny. About 10% of VD labels described the main player's pose rather than the group's activity, and correcting them changed how methods compare.</li>
+            <li>The single-frame bet has limits. Activities defined by motion, such as <em>waiting</em> versus <em>moving</em> in the Collective Activity dataset, are ambiguous in one image. The model also relies on given player boxes, and the team split and auxiliary labels exploit the structure of volleyball specifically.</li>
+          </ul>
+
+          <h2 id="cite">Citation</h2>
+          <div class="cite">
+            <button class="btn copy" type="button" data-copy="bibtex">Copy</button>
+<pre id="bibtex">@article{demirel2023decompl,
+  title={DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image},
+  author={Demirel, Berker and Ozkan, Huseyin},
+  journal={arXiv preprint arXiv:2303.06439},
+  year={2023}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

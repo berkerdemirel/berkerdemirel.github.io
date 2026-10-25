@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MorphGen · Berker Demirel</title>
+  <meta name="description" content="MorphGen generates full-resolution, six-channel Cell Painting images across cell types and perturbations, with an OpenPhenom alignment loss for biological fidelity.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/morphgen/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging">
+  <meta property="og:description" content="A latent diffusion transformer that generates all six Cell Painting channels at 512×512, across four cell types and their perturbations.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/morphgen/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/morphgen/poster.jpg">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
+</head>
+<body class="is-wide is-post" style="--hue: #5cd0b3">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../../">About</a>
+        <a href="../../research/">Research</a>
+        <a href="../../publications/">Publications</a>
+        <a href="../" aria-current="page">Blog</a>
+        <a href="../../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <article>
+      <header class="post-head">
+        <p class="kicker"><span class="dot"></span><a href="../../research/#generation">Generation</a><span aria-hidden="true">·</span><span>NeurIPS 2026</span></p>
+        <h1>MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging</h1>
+        <p class="authors"><span class="me">Berker Demirel</span>, <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>, <a href="https://karaletsos.com/">Theofanis Karaletsos</a>, <a href="https://www.francescolocatello.com/">Francesco Locatello</a></p>
+        <p class="affil">Institute of Science and Technology Austria (ISTA) · Chan Zuckerberg Initiative (CZI)</p>
+        <div class="res">
+          <a class="is-primary" href="https://arxiv.org/abs/2510.01298">paper</a>
+          <a href="https://github.com/czi-ai/MorphGen">code</a>
+          <a href="#cite">cite</a>
+        </div>
+      </header>
+
+      <figure class="teaser">
+        <div class="frame">
+          <video src="teaser.mp4" poster="poster.jpg" controls muted loop playsinline preload="metadata" data-autoplay></video>
+        </div>
+        <figcaption>Teaser · 36 s · muted</figcaption>
+      </figure>
+
+      <div class="post-layout">
+        <aside class="post-toc" aria-label="On this page"><nav><p>On this page</p><ol></ol></nav></aside>
+        <div class="post-body">
+          <div class="tldr">
+            <span class="kicker">TL;DR</span>
+            <p>MorphGen is a latent diffusion transformer that generates Cell Painting images at their native 512&thinsp;×&thinsp;512 resolution, with all six fluorescence channels, conditioned on both the perturbation and the cell type. Each channel is encoded separately and denoised jointly, and during training the model's features are aligned with OpenPhenom, a foundation model for cell images. It lowers FID by more than 35% relative to MorphoDiff, and perturbation effects measured on generated cells match those measured on real ones.</p>
+          </div>
+
+          <h2 id="why" data-toc="Why generate cells?">Why generate cells at all?</h2>
+          <p>Cell Painting is a high-content imaging assay that stains eight cellular compartments across six fluorescence channels. The resulting morphological fingerprints are remarkably useful: they cluster small molecules by mechanism of action, map gene function, and pick up disease-specific signatures for phenotypic drug discovery. Automated microscopes can image hundreds of thousands of cells per experiment.</p>
+          <p>Still, every experiment covers one condition. In RxRx1, the dataset we train on, there are 125,510 images from four human cell types (HUVEC, RPE, HepG2 and U2OS), each exposed to one of 1,108 siRNA knockdowns or 30 non-targeting controls. Picture the grid of perturbations by cell types: most of its cells were never imaged. A conditional generator that can fill in that grid, producing realistic images for any (perturbation, cell type) pair, would be an <em>in silico</em> surrogate for the experiment, a small step toward the "virtual instruments" that could prioritise which wet-lab experiments are worth running.</p>
+          <p>For that to be useful, the generated images have to carry biology, not only look plausible. That rules out a lot of shortcuts.</p>
+
+          <h2 id="gaps" data-toc="What was missing">What was missing</h2>
+          <p>When we started, image generators for Cell Painting fell short in three ways:</p>
+          <ul>
+            <li><strong>Resolution and architecture.</strong> The IMPA pipeline, used by IMPA (an AdaIN-conditional GAN) and by CellFlux (conditional flow matching), crops native fields down to 96&thinsp;×&thinsp;96 nuclei-centred patches and reports RxRx1 results for U2OS only. That simplifies the problem but suppresses organelle-level detail.</li>
+            <li><strong>RGB compression.</strong> MorphoDiff adapts Stable Diffusion to Cell Painting by projecting the six channels into RGB, so that the pretrained VAE can be reused. The projection is irreversible and merges organelle-specific signals.</li>
+            <li><strong>A single cell type.</strong> MorphoDiff trains on HUVEC only, and because perturbations are encoded with scGPT embeddings, images of perturbations without an scGPT entry are discarded.</li>
+          </ul>
+          <p>MorphGen is our attempt to close all three at once: full resolution, all six channels kept separate, and every RxRx1 plate across four cell lines and all perturbations.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-samples.jpg" alt="Grid of Cell Painting images: four columns (HEPG2 control p1138, HUVEC p1137, RPE p1124, U2OS p1108), with original images in the top row and MorphGen samples in the bottom row." width="1274" height="622" loading="lazy"></div>
+            <figcaption><b>Figure 1.</b> Original (top) and generated (bottom) images for four cell type / perturbation pairs from RxRx1. Generated images are not cherry-picked; the originals shown are neighbours of the generated ones (from the paper, Figure 1).</figcaption>
+          </figure>
+
+          <h2 id="model" data-toc="The model">One architecture, three design choices</h2>
+
+          <h3>1. Encode each organelle on its own</h3>
+          <p>We keep a latent diffusion setup, which is easier to train than pixel-space diffusion and lets us reuse a strong pretrained autoencoder (Stable Diffusion's <code>sd-vae-ft-mse</code>, kept frozen). That VAE expects three-channel RGB input, so instead of compressing six channels into three we take each grayscale channel \(x^{(c)}\), stack it three times into \(\tilde{x}^{(c)}\), and encode it separately. The six channel latents are then concatenated into one tensor that the diffusion model sees jointly:</p>
+          <div class="eq">$$ \begin{gathered} z^{(c)} = E_{\text{VAE}}\big(\tilde{x}^{(c)}\big) \in \mathbb{R}^{4 \times H' \times W'}, \\ z = \operatorname{concat}\big(z^{(1)}, \dots, z^{(6)}\big) \in \mathbb{R}^{24 \times H' \times W'}. \end{gathered} $$</div>
+          <p>Encoding channels separately preserves each organelle's signal and keeps every channel interpretable, while denoising them jointly lets the model capture dependencies between organelles. The effect on reconstruction alone is large: with the frozen VAE, the RGB route has a reconstruction MSE of \(7.13 \times 10^{-4}\), while organelle-aware encoding reaches \(4.93 \times 10^{-5}\) per channel, and still \(4.06 \times 10^{-4}\) after converting its reconstructions to RGB for a like-for-like comparison (Table 5 in the paper).</p>
+
+          <h3>2. A diffusion transformer, conditioned on biology</h3>
+          <p>The denoiser is a Scalable Interpolant Transformer (SiT-XL/2). Global self-attention suits Cell Painting fields, where related signals sit in different channels and in spatially separated structures. Following the EDM formulation, noisy latents interpolate between data and noise, \(z_t = \alpha_t z_0 + \sigma_t \epsilon\), and the network \(f_\theta\) predicts the velocity of that path:</p>
+          <div class="eq">$$ \begin{gathered} \mathcal{L}_{\text{diff}} = \mathbb{E}_{z_0, t, \epsilon} \Big[ \big\| f_\theta(z_t, c) - (\dot{\alpha}_t z_0 + \dot{\sigma}_t \epsilon) \big\|_2^2 \Big], \\ c = e_p + e_{ct} + e_t . \end{gathered} $$</div>
+          <p>The condition \(c\) adds learnable embeddings of the perturbation \(e_p\) and the cell type \(e_{ct}\) to the timestep embedding \(e_t\). Because these embeddings are learned from the images themselves rather than looked up in an external gene model, nothing has to be thrown away: MorphGen trains on all RxRx1 plates. Keeping the two factors as separate embeddings also lets us combine them freely, for example swapping the cell type while keeping the perturbation fixed.</p>
+
+          <h3>3. Align with a biological foundation model, during training only</h3>
+          <p>Concatenating six latents makes the latent space 24 channels deep, which makes diffusion training harder. We tame it with representation alignment (REPA), which was introduced to align intermediate diffusion-transformer features with a strong self-supervised model such as DINOv2. We keep the objective but swap the teacher for <strong>OpenPhenom</strong>, a channel-agnostic masked autoencoder trained on Cell Painting images. For a clean image \(x\), OpenPhenom gives patch embeddings \(y^\star = F(x)\); the SiT hidden state at layer \(k\), passed through a small MLP \(h_\phi\), is pulled towards them:</p>
+          <div class="eq">$$ \begin{gathered} \mathcal{L}_{\text{REPA}} = -\frac{1}{N} \sum_{n=1}^{N} \operatorname{sim}\Big(y^\star_n,\; h_\phi\big(h^{(k)}_{t,n}\big)\Big), \\ \mathcal{L} = \mathcal{L}_{\text{diff}} + \lambda\, \mathcal{L}_{\text{REPA}}, \end{gathered} $$</div>
+          <p>with \(k = 8\) and \(\lambda = 0.5\), following REPA. This nudges the generator towards biologically meaningful features instead of spurious texture. OpenPhenom is a training-time teacher only: at sampling time it is not used at all.</p>
+
+          <h3>Sampling</h3>
+          <p>Generation starts from Gaussian noise in the 24-channel latent and runs a 50-step Euler–Maruyama sampler. The final latent is split back into six channel latents, each is decoded by the VAE, the three identical colour planes are averaged back to grayscale, and the six channels are stacked into a 6&thinsp;×&thinsp;512&thinsp;×&thinsp;512 image. As far as we know, MorphGen is the first model to jointly synthesise all six Cell Painting channels at this resolution. (Training used a batch size of 16 for up to 400k steps on 8 H100 GPUs.)</p>
+
+          <h2 id="quality" data-toc="Image quality">How good are the images?</h2>
+          <p>To compare with MorphoDiff on its own terms we adopt its protocol: 50 randomly chosen siRNAs, HUVEC only, and our six-channel outputs converted to RGB with Recursion's visualisation script. Scores use 500 generated against 500 real images and three seeds, and we report FID unscaled (MorphoDiff reports it divided by 100). Even in this constrained setting, which does not use most of what MorphGen can do, it improves substantially on both baselines, and the gap carries over to the Rohban dataset (U2OS cells with ORF overexpression).</p>
+
+          <div class="table-wrap">
+            <table class="results">
+              <caption>FID and KID, lower is better (Table 1 in the paper). RxRx1 uses HUVEC and 50 random perturbations; Rohban results are for the 5-gene and 12-gene subsets. MorphGen numbers are mean ± 95% CI over three seeds.</caption>
+              <thead><tr><th>Method</th><th>FID ↓</th><th>KID ↓</th></tr></thead>
+              <tbody>
+                <tr class="group"><th colspan="3" scope="colgroup">RxRx1 (HUVEC), 50 perturbations</th></tr>
+                <tr><td>Stable Diffusion</td><td>115</td><td>0.11</td></tr>
+                <tr><td>MorphoDiff</td><td>78</td><td>0.05</td></tr>
+                <tr class="is-ours"><td>MorphGen</td><td class="best">50.2 ± 2.45</td><td class="best">0.01 ± 0.000</td></tr>
+                <tr class="group"><th colspan="3" scope="colgroup">Rohban, 5 genes</th></tr>
+                <tr><td>Stable Diffusion</td><td>326</td><td>0.45</td></tr>
+                <tr><td>MorphoDiff</td><td>251</td><td>0.33</td></tr>
+                <tr class="is-ours"><td>MorphGen</td><td class="best">100.24 ± 1.53</td><td class="best">0.05 ± 0.014</td></tr>
+                <tr class="group"><th colspan="3" scope="colgroup">Rohban, 12 genes</th></tr>
+                <tr><td>Stable Diffusion</td><td>317</td><td>0.45</td></tr>
+                <tr><td>MorphoDiff</td><td>277</td><td>0.38</td></tr>
+                <tr class="is-ours"><td>MorphGen</td><td class="best">123.93 ± 3.51</td><td class="best">0.08 ± 0.017</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Beyond RGB, MorphGen generates every organelle channel across all four cell types, something no baseline supports. Absolute FIDs are not comparable across channels, whose target distributions differ, so we also report a <strong>relative FID</strong>: the FID between generated and real images divided by the FID between two disjoint real subsets. A value of 1 means the generated set is as close to the real data as the real data is to itself.</p>
+
+          <div class="table-wrap">
+            <table class="results">
+              <caption>Per-channel results for 50 random perturbations across all four cell types (Table 2 in the paper). Column names follow the paper.</caption>
+              <thead><tr><th>Metric</th><th>RGB</th><th>Nucleus</th><th>ER</th><th>Actin</th><th>Cyto</th><th>Nucleolus</th><th>Mito</th></tr></thead>
+              <tbody>
+                <tr><td>FID ↓</td><td>50.2</td><td>27.6</td><td>48.1</td><td>57.6</td><td>49.6</td><td>43.6</td><td>59.0</td></tr>
+                <tr><td>Rel. FID ↓</td><td>1.411</td><td>1.691</td><td>1.774</td><td>1.562</td><td>1.612</td><td class="best">1.489</td><td>1.564</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>The nucleolus channel is modelled best (relative FID 1.489) and the ER is the hardest (1.774). Sampling by cell type without perturbation conditioning, and therefore without the augmentation needed to inflate small perturbation sets, gives relative FIDs between 1.136 (HUVEC) and 1.529 (HepG2), see Table 3 in the paper.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-channels.jpg" alt="Six pairs of single-channel fluorescence images of a control HEPG2 field, original above and generated below, for the nucleus, ER, actin, nucleolus, mitochondria and Golgi channels." width="1348" height="466" loading="lazy"></div>
+            <figcaption><b>Figure 2.</b> Original and generated single-channel images for each organelle in a control HEPG2 field, shown with the RxRx1-recommended colour maps. Not cherry-picked (from the paper, Figure 2).</figcaption>
+          </figure>
+
+          <h2 id="biology" data-toc="Do they carry biology?">Do the images carry biology?</h2>
+          <p>Low FID says the images look right to an Inception network. For screening, the question is whether the <em>morphology</em> is right, and whether a perturbation changes it the way the real perturbation does. We checked this with two independent feature spaces on HUVEC cells, using the four most frequent perturbations in the dataset: 1108, 1124, 1137 and the control 1138.</p>
+          <p><strong>CellProfiler.</strong> From the classical CellProfiler pipeline (after variance thresholding, standardisation and removing collinear features), generated samples fall inside the real clusters of their perturbation while the perturbations stay separated, and the pairwise correlation structure of the top-10 PCA-selected features closely matches between real and generated data (Figures 3 and 4 in the paper).</p>
+          <p><strong>OpenPhenom.</strong> The same picture holds in OpenPhenom's embedding space: real and generated embeddings overlap within each perturbation, and the deviation of each perturbation from the control is reproduced. Recall that sampling does not use OpenPhenom, so these images are generated and embedded independently.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-pca.png" alt="Two PCA scatter plots of OpenPhenom features. Left: real (circles) and generated (crosses) HUVEC samples for perturbations p1108, p1138, p1124 and p1137 form overlapping clusters per perturbation. Right: perturbation 1108 across four cell types, real and generated samples overlapping per cell type." width="1252" height="491" loading="lazy"></div>
+            <figcaption><b>Figure 3.</b> PCA of OpenPhenom features of real and generated images. Left: the most frequent perturbations in HUVEC, coloured by perturbation. Right: perturbation 1108 across cell types. Marker shape indicates real or generated (from the paper, Figure 5).</figcaption>
+          </figure>
+
+          <p><strong>Treatment effects.</strong> To make this quantitative we compute a conditional average treatment effect (CATE) in OpenPhenom feature space: the squared distance between the mean image-level embedding \(Y\) of control cells and that of perturbed cells of the same cell type,</p>
+          <div class="eq">$$ \begin{gathered} \operatorname{CATE}(p) = \big\| \mu_{\text{control}} - \mu_{p} \big\|^2, \\ \mu_{q} = \mathbb{E}\big[\,Y \mid P = q,\; ct = \text{HUVEC}\,\big], \end{gathered} $$</div>
+          <p>computed once on real images and once on generated ones. The point is not that this distance is itself a biological quantity, but that population-level conclusions drawn from generated images should match those drawn from real ones. They do: the ordering and the magnitudes agree, with perturbation 1137 producing the largest deviation from control and 1108 the smallest.</p>
+
+          <div class="table-wrap">
+            <table class="results">
+              <caption>CATE between the control (p1138) and perturbed HUVEC samples, computed on real and on generated images (Table 4 in the paper).</caption>
+              <thead><tr><th>Comparison</th><th>CATE<sub>real</sub></th><th>CATE<sub>gen</sub></th><th>ΔCATE ↓</th></tr></thead>
+              <tbody>
+                <tr><td>p1138 vs p1137</td><td>7.85</td><td>7.41</td><td>0.43</td></tr>
+                <tr><td>p1138 vs p1124</td><td>2.13</td><td>2.31</td><td>0.18</td></tr>
+                <tr><td>p1138 vs p1108</td><td>0.44</td><td>0.38</td><td>0.06</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p><strong>Downstream use.</strong> Generated images also transfer to classifiers. A linear perturbation classifier on CellProfiler features trained only on generated HUVEC images reaches 0.739 accuracy on real images, close to the 0.794 of training on real images (Table 12). In a harder ten-perturbation probe on OpenPhenom features, adding MorphGen images to the real training set raises accuracy on real test images from 67.7% to 71.2% (Table 13). Because OpenPhenom was used for alignment, we repeated the probe with an independently trained ResNet18 feature extractor and saw the same trend, 45.6% to 49.9% (Table 14).</p>
+
+          <h2 id="ablations" data-toc="What matters">What matters</h2>
+          <p>Removing the alignment loss costs more than 10% in FID and over 20% in KID on the HUVEC benchmark: FID goes from 56.87 ± 3.35 without alignment to 50.2 ± 2.45 with it (Table 6). Together with the reconstruction comparison above, this points to the two halves of the design doing different jobs: per-channel encoding keeps the organelle information in the latent, and biological alignment makes the much larger latent space trainable and steers it towards morphology.</p>
+
+          <h2 id="virtual" data-toc="Unseen combinations">A first look at unseen combinations</h2>
+          <p>A virtual instrument has to produce conditions it has not seen. As a proof of concept, we retrained MorphGen with one combination removed: perturbation 1137 on HUVEC, the most frequent cell type paired with the strongest of the four common perturbations. The held-out model's samples for that pair are essentially as good as those of the model that saw it, with FID 38.14 versus 38.07 against the same real images and ΔCATE 0.46 versus 0.43.</p>
+          <p>We do not read too much into this. The model has seen many HUVEC images and many cells under perturbation 1137 in other cell types, so this particular compositional gap is close to the training distribution. It is encouraging rather than conclusive. Deciding <em>when</em> to trust a generated sample for a condition without any real reference is a problem in its own right, which we study in <a href="../sample-quality/">Assessing Sample Quality in Conditional Generation under Compositional Shift</a>.</p>
+
+          <h2 id="limitations">Limitations</h2>
+          <ul>
+            <li><strong>Rare perturbations.</strong> We could not evaluate generalisation to uncommon perturbations: beyond HUVEC, RxRx1 has too few samples per perturbation for reliable metrics. Larger datasets such as RxRx3 exist but cover a single cell type.</li>
+            <li><strong>No extrapolation to novel conditions.</strong> Conditions are learned embeddings of known labels, so MorphGen cannot generate a perturbation it has never seen. Learning conditioning embeddings from image examples, which would remove the need for labels, is a direction we want to explore.</li>
+            <li><strong>Low-resolution pipelines.</strong> On the IMPA pipeline's 96&thinsp;×&thinsp;96 U2OS crops, which MorphGen was not trained for, CellFlux has a slightly lower relative FID than MorphGen (2.091 vs 2.260, Table 9). When each model's 96&thinsp;×&thinsp;96 crops are compared against its own target data, MorphGen is closer (1.417 vs 2.091, Table 8).</li>
+            <li><strong>Associations, not causes.</strong> CATE here is an associational difference in a feature space. Specific causal conclusions still depend on the usual assumptions holding on the real data.</li>
+          </ul>
+
+          <h2 id="cite">Citation</h2>
+          <div class="cite">
+            <button class="btn copy" type="button" data-copy="bibtex">Copy</button>
+<pre id="bibtex">@inproceedings{demirel2026morphgen,
+  title={MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging},
+  author={Berker Demirel and Marco Fumero and Theofanis Karaletsos and Francesco Locatello},
+  booktitle={The Fortieth Annual Conference on Neural Information Processing Systems},
+  year={2026},
+  url={https://arxiv.org/abs/2510.01298}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

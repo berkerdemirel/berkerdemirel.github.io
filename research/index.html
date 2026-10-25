@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Research · Berker Demirel</title>
+  <meta name="description" content="Research of Berker Demirel: representation learning, generalization, and generative modeling, with interactive sketches and paper explainers.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/research/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="Research · Berker Demirel">
+  <meta property="og:description" content="Representation learning, generalization, and generative modeling, with interactive sketches and paper explainers.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://berkerdemirel.github.io/research/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/lambda-jepa/poster.jpg">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="is-wide">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../">About</a>
+        <a href="./" aria-current="page">Research</a>
+        <a href="../publications/">Publications</a>
+        <a href="../blog/">Blog</a>
+        <a href="../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="page-intro">
+      <h1>Research</h1>
+      <p>I study the geometry and structure of neural representations: how they are organized, when they collapse, and how they behave under distribution shift. That interest spreads into three closely related areas. Representation learning asks what makes a representation good and how to learn one. Generalization asks when what a model has learned carries over beyond its training distribution, and how to tell when it does not. Generation asks how to learn a data distribution well enough to sample from it, and how to judge the samples.</p>
+      <p>The three keep running into each other. How far a model generalizes depends on the representations it learns; generated samples are judged in learned feature spaces, and they matter most exactly where generalization is in question.</p>
+      <ul class="theme-nav" aria-label="Areas">
+        <li><a href="#representation"><span class="num">01</span>Representation learning</a></li>
+        <li><a href="#generalization"><span class="num">02</span>Generalization</a></li>
+        <li><a href="#generation"><span class="num">03</span>Generation</a></li>
+      </ul>
+    </header>
+
+    <!-- ===================================================== 01 Representation learning -->
+    <section class="theme" id="representation" aria-labelledby="t1">
+      <div class="theme-head">
+        <div>
+          <span class="kicker">01</span>
+          <h2 id="t1">Representation learning</h2>
+        </div>
+        <div>
+          <p>A representation maps raw inputs to features that other models build on, usually without knowing in advance which tasks will come. Two desiderata make “good” concrete. The representation should be <strong>task-agnostic</strong>: the information downstream tasks need should be there. And it should be <strong>easily probeable</strong>: that information should be readable without much effort, for instance by a linear probe.</p>
+          <p class="kicker questions-label">Questions</p>
+          <ul class="questions">
+            <li>What makes a representation good, and how can we tell without knowing the downstream tasks?</li>
+            <li>How can we learn representations that meet both desiderata, ideally without labels?</li>
+            <li>How does the geometry of a representation, the way information spreads across its directions, shape what can be read from it?</li>
+          </ul>
+        </div>
+      </div>
+
+      <figure class="viz" data-viz="desiderata">
+        <div class="viz-stage">
+          <div class="viz-panel">
+            <h3>Representation</h3>
+            <canvas data-role="rep" role="img" aria-label="Two-dimensional representation of inputs that differ in shape and color, with the decision lines of linear probes for each factor."></canvas>
+            <ul class="viz-legend">
+              <li><span class="sw" style="color: var(--ink-soft)"></span>circle</li>
+              <li><span class="sw is-tri" style="color: var(--ink-soft)"></span>triangle</li>
+              <li><span class="sw" style="color: var(--series-1)"></span>color 1</li>
+              <li><span class="sw" style="color: var(--series-2)"></span>color 2</li>
+              <li><span class="sw is-line" style="color: var(--ink)"></span>linear probe</li>
+            </ul>
+          </div>
+          <div class="viz-panel">
+            <h3>Probe accuracy</h3>
+            <canvas data-role="probes" role="img" aria-label="Bar chart of linear and flexible probe accuracy for the shape task and the color task."></canvas>
+            <ul class="viz-legend">
+              <li><span class="sw is-bar" style="color: var(--accent)"></span>linear probe</li>
+              <li><span class="sw is-bar is-ring" style="color: var(--accent)"></span>flexible probe (kNN)</li>
+            </ul>
+            <p class="viz-note" data-read="verdict" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="viz-controls">
+          <div class="seg" role="group" aria-label="Representation">
+            <button type="button" data-value="good" aria-pressed="true">Good</button>
+            <button type="button" data-value="collapsed" aria-pressed="false">Collapsed</button>
+            <button type="button" data-value="entangled" aria-pressed="false">Entangled</button>
+          </div>
+        </div>
+      </figure>
+
+      <ul class="card-grid">
+        <li>
+          <article class="paper-card" data-preview style="--hue: #58c4dd">
+            <div class="thumb">
+              <img src="../blog/lambda-jepa/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/lambda-jepa/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>arXiv 2026</p>
+              <h3><a href="../blog/lambda-jepa/">λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning</a></h3>
+              <p>Anti-collapse objectives keep the projector high-rank but can leave the backbone collapsed. SACReg regularizes the backbone directly.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===================================================== 02 Generalization -->
+    <section class="theme" id="generalization" aria-labelledby="t2">
+      <div class="theme-head">
+        <div>
+          <span class="kicker">02</span>
+          <h2 id="t2">Generalization</h2>
+        </div>
+        <div>
+          <p>Generalization is about when a model can go beyond its training distribution and when it cannot. The training data never pin down a model's behavior everywhere, so how far it carries depends on assumptions about how training and deployment differ: which factors may change, which stay fixed, and whether a change is visible in the inputs at all. When those assumptions fail, the next best thing is to notice, for classifiers and generative models alike.</p>
+          <p class="kicker questions-label">Questions</p>
+          <ul class="questions">
+            <li>When should we expect a model to generalize, and what does that require of the data and the model?</li>
+            <li>Can we detect when a model fails to generalize?</li>
+            <li>How do models from different learning paradigms, such as classifiers and generative models, react to the same shift?</li>
+          </ul>
+        </div>
+      </div>
+
+      <figure class="viz" data-viz="shift">
+        <div class="viz-stage">
+          <div class="viz-panel">
+            <h3>Inputs</h3>
+            <canvas data-role="inputs" role="img" aria-label="Input space. Dots are the fixed training data; the shaded region is the test distribution, colored by its true class, with the part the classifier gets wrong hatched. The solid line is the learned boundary and the dashed line the true boundary of the test data."></canvas>
+            <ul class="viz-legend">
+              <li><span class="sw" style="color: var(--ink-soft)"></span>training data</li>
+              <li><span class="sw is-bar test-shade"></span>test data</li>
+              <li><span class="sw" style="color: var(--series-1)"></span>class A</li>
+              <li><span class="sw" style="color: var(--series-2)"></span>class B</li>
+              <li><span class="sw is-line" style="color: var(--ink)"></span>learned boundary</li>
+              <li><span class="sw is-dash" style="color: var(--warm)"></span>true boundary</li>
+              <li><span class="sw is-bar hatch"></span>misclassified</li>
+            </ul>
+          </div>
+          <div class="viz-panel">
+            <h3>As the shift grows</h3>
+            <canvas data-role="curves" role="img" aria-label="Line chart of accuracy, mean confidence, and the share of inputs flagged as out-of-distribution, as a function of the amount of shift."></canvas>
+            <ul class="viz-legend">
+              <li><span class="sw is-line" style="color: var(--series-1)"></span>accuracy</li>
+              <li><span class="sw is-dash" style="color: var(--series-2)"></span>confidence</li>
+              <li><span class="sw is-dash" style="color: var(--series-3)"></span>flagged OOD</li>
+            </ul>
+            <div class="viz-readout" aria-live="polite">
+              <span>accuracy <b data-read="acc">–</b></span>
+              <span>confidence <b data-read="conf">–</b></span>
+              <span>flagged OOD <b data-read="ood">–</b></span>
+            </div>
+            <dl class="viz-status" aria-live="polite">
+              <div><dt>inputs</dt><dd data-read="inputs">–</dd></div>
+              <div><dt>labeling rule</dt><dd data-read="rule">–</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="viz-controls">
+          <button class="btn" type="button" data-role="play" aria-pressed="false"></button>
+          <label>Shift <input type="range" min="0" max="100" value="70" aria-label="Amount of shift"> <output>70%</output></label>
+          <div class="seg" role="group" aria-label="Kind of shift">
+            <button type="button" data-value="benign" aria-pressed="true">Benign</button>
+            <button type="button" data-value="harmful" aria-pressed="false">Harmful</button>
+            <button type="button" data-value="concept" aria-pressed="false">Concept</button>
+          </div>
+        </div>
+      </figure>
+
+      <ul class="card-grid">
+        <li>
+          <article class="paper-card" data-preview style="--hue: #f0ac5f">
+            <div class="thumb">
+              <img src="../blog/ora/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/ora/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>NeurIPS 2025 · detecting failure in classifiers</p>
+              <h3><a href="../blog/ora/">Out-of-Distribution Detection with Relative Angles</a></h3>
+              <p>A post-hoc, hyperparameter-free OOD score: the angle between a feature and its projection onto the decision boundaries, seen from the ID mean.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+        <li>
+          <article class="paper-card" data-preview style="--hue: #cfa3e8">
+            <div class="thumb">
+              <img src="../blog/sample-quality/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/sample-quality/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>NeurIPS 2026 · detecting failure in generative models</p>
+              <h3><a href="../blog/sample-quality/">Assessing Sample Quality in Conditional Generation under Compositional Shift</a></h3>
+              <p>When the requested condition was never observed, there is no target distribution to compare against. A per-sample trust score needs only the training data.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+        <li>
+          <article class="paper-card" data-preview style="--hue: #83c167">
+            <div class="thumb">
+              <img src="../blog/adrmx/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/adrmx/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>arXiv 2023 · modeling for generalization</p>
+              <h3><a href="../blog/adrmx/">ADRMX: Additive Disentanglement of Domain Features with Remix Loss</a></h3>
+              <p>Domain generalization that keeps domain-specific features instead of discarding them, plus a latent-space remix augmentation.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===================================================== 03 Generation -->
+    <section class="theme" id="generation" aria-labelledby="t3">
+      <div class="theme-head">
+        <div>
+          <span class="kicker">03</span>
+          <h2 id="t3">Generation</h2>
+        </div>
+        <div>
+          <p>Generative modeling is the effort to sample from a data distribution: unconditionally, learning the distribution of the inputs alone, or conditionally, given a label, attributes, or an experimental condition. The model only ever sees a finite sample, so it has to balance staying close to that sample against generalizing beyond it, and judging how well it did is a problem of its own.</p>
+          <p class="kicker questions-label">Questions</p>
+          <ul class="questions">
+            <li>How can we model an input distribution? Diffusion and latent diffusion models, GANs, and drifting models take very different routes.</li>
+            <li>Can a model generate novel examples, or does it memorize its training data?</li>
+            <li>How can we assess whether a generation is good? Distributional metrics, classifier-based evaluation of conditional samples, and independent, domain-specific evaluators each see a different part of the answer.</li>
+          </ul>
+        </div>
+      </div>
+
+      <figure class="viz" data-viz="generative">
+        <div class="viz-stage">
+          <div class="viz-panel">
+            <h3>Sampling</h3>
+            <canvas data-role="samples" role="img" aria-label="Diffusion sampling on two-moons data: trajectories from noise to data, training points as rings, generated samples as dots, and near-copies of training points highlighted."></canvas>
+            <ul class="viz-legend">
+              <li><span class="sw is-ring" style="color: var(--ink-soft)"></span>training point</li>
+              <li><span class="sw is-line" style="color: var(--accent)"></span>sampling trajectory</li>
+              <li><span class="sw" style="color: var(--accent)"></span>generated sample</li>
+              <li><span class="sw" style="color: var(--warm)"></span>near-copy of a training point</li>
+            </ul>
+          </div>
+          <div class="viz-panel">
+            <h3>Evaluation</h3>
+            <canvas data-role="metrics" role="img" aria-label="Two small line charts across the amount of smoothing: Fréchet distance to held-out data and the share of near-copies of training points."></canvas>
+          </div>
+        </div>
+        <div class="viz-controls">
+          <button class="btn" type="button" data-role="resample">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>Sample
+          </button>
+          <label>Smoothing <span class="range-end">heavy</span><input type="range" min="0" max="100" value="50" aria-label="Amount of smoothing of the learned distribution, from heavy to none"><span class="range-end">none</span> <output>h</output></label>
+        </div>
+      </figure>
+
+      <ul class="card-grid">
+        <li>
+          <article class="paper-card" data-preview style="--hue: #5cd0b3">
+            <div class="thumb">
+              <img src="../blog/morphgen/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/morphgen/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>NeurIPS 2026 · modeling</p>
+              <h3><a href="../blog/morphgen/">MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging</a></h3>
+              <p>A latent diffusion transformer that generates all six Cell Painting channels at full resolution, across cell types and perturbations.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+        <li>
+          <article class="paper-card" data-preview style="--hue: #cfa3e8">
+            <div class="thumb">
+              <img src="../blog/sample-quality/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+              <video src="../blog/sample-quality/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+            </div>
+            <div class="body">
+              <p class="meta"><span class="dot"></span>NeurIPS 2026 · evaluation</p>
+              <h3><a href="../blog/sample-quality/">Assessing Sample Quality in Conditional Generation under Compositional Shift</a></h3>
+              <p>Filter, rank, or abstain on generated samples using realism and attribute-wise faithfulness, estimated from the training distribution alone.</p>
+              <span class="read">Read the post →</span>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../assets/js/site.js" defer></script>
+  <script src="../assets/js/research-viz.js" defer></script>
+</body>
+</html>

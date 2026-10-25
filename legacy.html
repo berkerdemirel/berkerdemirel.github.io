@@ -1,0 +1,401 @@
+<!DOCTYPE HTML>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-QC2GQV1130"></script> -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-QC2GQV1130');
+</script>
+
+  <title>Berker Demirel</title>
+  
+  <meta name="author" content="Berker Demirel">
+  <meta name="viewport" content="width=device-width, initial-scale=1">    
+  
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="icon" type="image/png" href="images/IDSIA_logo.png">
+</head>
+
+<body>
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+    <tr style="padding:0px"><td style="padding:0px">
+      <!-- Intro -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <tr style="padding:0px">
+          <td style="padding:2.5%;width:63%;vertical-align:middle">
+            <p style="text-align:center">
+              <name>Berker Demirel</name>
+            </p>
+            <p>
+              I am a PhD candidate at the <a href="https://ista.ac.at/en/research/locatello-group/">Causal Learning and Artificial Intelligence Lab</a> at <a href="https://ista.ac.at/en/home/">IST Austria</a>, supervised by <a href="https://www.francescolocatello.com/">Francesco Locatello</a>. My research focuses on representation learning, in particular the geometry and structure of neural representations. I am interested in how representations are organized, when they collapse, and how they behave under distribution shift. More broadly, my work spans self-supervised learning, generalization, and generative modeling.
+            </p>
+
+            <p>
+              I am co-affiliated with <a href="https://chanzuckerberg.com/science/">the Chan Zuckerberg Initiative's AI for Science program</a>, which supports my PhD research.
+            </p>
+            
+            <p>
+              Prior to beginning my PhD, I earned a master's degree from Sabanci University. During this time, I was a member of the <a href="https://www.vpalab.com/">VPA Lab</a> and was under the supervision of Asst. Prof. <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a> and Asst. Prof. <a href="https://sites.google.com/view/erchan-aptoula/">Erchan Aptoula</a>. The primary focus of my master's studies was on group activity recognition and domain generalization.
+            </p>
+            
+            <p>
+              In the summer of 2019, I completed a summer internship at <a href="https://www.eur.nl/en">Erasmus University Rotterdam</a>.
+            </p>
+            
+            
+            <p style="text-align:center">
+              <a href="mailto:berker.demirel@ist.ac.at">Email</a> &nbsp/&nbsp
+              <a href="./cv/00_Berker_Demirel_CV.pdf">CV</a> &nbsp/&nbsp
+              <a href="https://github.com/berkerdemirel/">GitHub</a> &nbsp/&nbsp
+              <a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&hl=en&oi=ao">Google Scholar</a> &nbsp/&nbsp
+              <a href="https://x.com/berkerdemirel97">Twitter</a>
+            </p>
+          </td>
+          <td style="padding:2.5%;width:40%;max-width:40%">
+            <a href="./photos/photo.jpeg"><img style="width:100%;max-width:100%" alt="profile photo" src="./photos/photo.jpeg" class="hoverZoomLink"></a>
+          </td>
+        </tr>
+      </tbody></table>
+
+      <!-- Publications title -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <tr>
+          <td style="padding:20px;width:100%;vertical-align:middle">
+            <heading>Publications and Projects</heading>
+          </td>
+        </tr>
+      </tbody></table>
+        
+      <!-- List of publications and projects -->
+      <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+        <!-- λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/lambda_jepa_schematic.png" width="275">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2609.35288">
+              <papertitle>λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://clementinedomine.github.io/">Clémentine Dominé</a>,
+            <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="http://marcomondelli.com/">Marco Mondelli</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2609.35288, 2026 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2609.35288">pdf</a> /
+            <a href="https://github.com/berkerdemirel/lambda-jepa">code</a> /
+            <a href="./refs/lambdajepa.bib">bib</a>
+            <br>
+            <p>
+              Joint-embedding self-supervised methods pair an invariance objective across augmented views with a mechanism that prevents
+              representational collapse, but these objectives are usually applied after a projection head while downstream tasks use the
+              backbone representation before it. We find that this mismatch does not necessarily prevent dimensional collapse in the backbone,
+              which can retain low effective rank and limit transfer. We introduce SACReg, a spectral anti-collapse regularizer motivated by an
+              analysis of λ-balance, the relative scale of weight matrices across layers. In a two-layer linear network, λ-balance provably
+              prevents collapse and SACReg applied to the backbone induces λ-balance; in the nonlinear case it also prevents collapse and, in
+              realistic architectures on ImageNet100, empirically increases the rank of the representations. Applying SACReg to JEPA yields
+              λ-JEPA, which improves over LeJEPA and VISReg on ImageNet-1k classification and in average linear-probe transfer across eight
+              downstream image datasets, and over LeVJEPA and V-JEPA 2 on the Something-Something-v2 and Kinetics-400 video benchmarks.
+            </p>
+          </td>
+        </tr>
+        <!-- Assessing Sample Quality in Conditional Generation under Compositional Shift -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/faithfulness_teaser.png" width="275" height="165">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2606.09601">
+              <papertitle>Assessing Sample Quality in Conditional Generation under Compositional Shift</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> NeurIPS, 2026 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2606.09601">pdf</a> /
+            <a href="https://github.com/berkerdemirel/faithful-cond-gen">code</a> /
+            <a href="./refs/faithful.bib">bib</a>
+            <br>
+            <p>
+              Conditional generators are most useful precisely where real samples are rare or unobserved, yet standard metrics like FID/KID
+              require a reference target distribution that is unavailable in this extrapolative regime. We introduce a post-hoc, per-sample
+              trust score that needs only the training distribution. The score combines global realism, measuring compatibility with the real
+              data manifold, and attribute-wise faithfulness, measuring whether a sample is closer to the requested attributes than to plausible
+              alternatives. This enables effective filtering, ranking, and abstention of generations on off-the-shelf pretrained models, and can
+              even be applied during generation to abstain before full decoding. In biological imaging and controlled vision benchmarks, selected
+              samples better preserve real structure and improve downstream predictive performance.
+            </p>
+          </td>
+        </tr>
+        <!-- MorphGen -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/morphgen.png" width="275">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2510.01298">
+              <papertitle>MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> NeurIPS, 2026 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2510.01298">pdf</a> /
+            <a href="https://github.com/czi-ai/MorphGen">code</a> /
+            <a href="./refs/morphgen.bib">bib</a>
+            <br>
+            <p>
+              We present MorphGen, a generative model designed for fluorescent microscopy, enabling controllable and biologically consistent image generation across various cell types
+              and perturbations. By leveraging a diffusion-based approach and aligning with phenotypic embeddings from OpenPhenom, MorphGen preserves detailed 
+              organelle-specific structures across multiple fluorescent channels. This capability supports fine-grained morphological analysis, advancing applications in drug 
+              discovery and gene editing.
+            </p>
+          </td>
+        </tr>
+        <!-- Out-of-Distribution Detection with Relative Angles -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/lafo.png" width="250">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://openreview.net/forum?id=ul5mlXrLZb&referrer=%5Bthe%20profile%20of%20Francesco%20Locatello%5D(%2Fprofile%3Fid%3D~Francesco_Locatello1)">
+              <papertitle>Out-of-Distribution Detection with Relative Angles</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> NeurIPS, 2025 </em>
+            <br>
+            <a href="https://openreview.net/pdf?id=ul5mlXrLZb">pdf</a> /
+            <a href="https://github.com/berkerdemirel/ORA-OOD-Detection-with-Relative-Angles/">code</a> /
+            <a href="./refs/ora.bib">bib</a>
+            <br>
+            <p>
+              We present a novel technique Out-of-Distribution Detection with Relative Angles (ORA), which computes the angles between the feature representation 
+              and its projection to the decision boundaries, relative to the mean of ID-features. ORA is model-agnostic, hyperparameter-free, and efficient, 
+              scaling linearly with the number of ID-classes. Therefore, it can flexibly be combined with various architectures without the need for additional 
+              tuning. In addition, the scale-invariant property of ORA allows for straightforward aggregation of confidence scores from multiple pre-trained 
+              models, improving ensemble performance for OOD detection.
+            </p>
+          </td>
+        </tr>
+        <!-- Adjusting Pretrained Backbones for Performativity -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/pap.png" width="265">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2410.04499">
+              <papertitle>Adjusting Pretrained Backbones for Performativity</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://csd.cmu.edu/people/doctoral-student/lingjing-kong">Lingjing Kong</a>,
+            <a href="https://www.andrew.cmu.edu/user/kunz1/">Kun Zhang</a>,
+            <a href="https://karaletsos.com/">Theofanis Karaletsos</a>,
+            <a href="https://celestine.ai/">Celestine Mendler-Dünner</a>,
+            <a href="https://www.francescolocatello.com/">Francesco Locatello</a>
+            <br>
+              <em> arXiv:2410.04499, 2024 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2410.04499">pdf</a> /
+            <a href="https://github.com/berkerdemirel/Adjusting-Pretrained-Backbones-for-Performativity">code</a> /
+            <a href="./refs/pap.bib">bib</a>
+            <br>
+            <p>
+              We propose a modular approach to tackle performative label shift for pretrained backbones. This additional module serves two main use cases: 
+              (i) adapting the model for performative shift and (ii) making informed model selection by anticipating future distributions caused by multiple 
+              models. For the first use case, it allows pre-shift adaptation for networks to better handle performative shifts. For the second, it can 
+              anticipate a model's robustness to performative shifts, enabling more informative model selection. Thanks to our modeling approach capturing 
+              the inherent relationship between the sufficient statistic and the performative shift, it is not coupled with the specific architecture it is 
+              trained with. Therefore, it can seamlessly combine with various pretrained networks, allowing zero-shot transfer during model updates.
+            </p>
+          </td>
+        </tr>
+
+                <!-- DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image -->
+                <tr>
+                  <td style="padding:20px;width:25%;vertical-align:middle">
+                      <img src="./photos/DECOMPL.png" width="250">
+                  </td>
+                  <td style="padding:20px;width:75%;vertical-align:middle">
+                    <a href="https://arxiv.org/abs/2303.06439">
+                      <papertitle>DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image</papertitle>
+                    </a>
+                    <br>
+                    <strong>Berker Demirel</strong>,
+                    <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a>
+                    <br>
+                      <em> IEEE International Conference on Image Processing (ICIP), 2024 </em>
+                    <br>
+                    <a href="https://arxiv.org/pdf/2303.06439.pdf">pdf</a> /
+                    <a href="https://github.com/berkerdemirel/decompl">code</a> /
+                    <a href="./refs/decompl.bib">bib</a>
+                    <br>
+                    <p>
+                      We show that Group Activity Recognition Problem can be formulated using Attention Pooling mechanism and can perform on par with
+                      the other state-of-the-art methods even with a single RGB frame. Moreover, we manually reannotated the flawed instances in the Volleyball Dataset,
+                      which is one of the widely used datasets in Group Activity Recognition.
+                    </p>
+                  </td>
+                </tr>
+        
+        <!-- ADRMX: Additive Disentanglement of Domain Features with Remix Loss -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/ADRMX_2.png" width="220">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://arxiv.org/abs/2308.06624">
+              <papertitle>ADRMX: Additive Disentanglement of Domain Features with Remix Loss</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://sites.google.com/view/erchan-aptoula/">Erchan Aptoula</a>,
+            <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a>
+            <br>
+              <em> arXiv:2308.06624, 2023 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2308.06624.pdf">pdf</a> /
+            <a href="https://github.com/berkerdemirel/adrmx">code</a> /
+            <a href="./refs/adrmx.bib">bib</a>
+            <br>
+            <p>
+              We propose an additive disentanglement of domain specific and domain invariant features for the domain generalization problem. Unlike prior work, 
+              we demonstrate the potential benefits of utilizing domain specific features along with domain invariant ones. Moreover, we introduce a new data 
+              augmentation technique to enhance the generalization capacity of the architecture, where samples from different domains are mixed 
+              within the latent space.
+            </p>
+          </td>
+        </tr>
+        
+        <!-- Vertex Ordering Algorithm for Graph Coloring Problem -->
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/graph_coloring.png" width="230">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://ieeexplore.ieee.org/abstract/document/9302296">
+              <papertitle>Vertex Ordering Algorithms for Graph Coloring Problem</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://www.linkedin.com/in/ardaasik/">Arda Asik</a>,
+            <a href="https://www.linkedin.com/in/bdemir97/">Bugra Demir</a>,
+            <a href="https://fens.sabanciuniv.edu/en/faculty-members/detail/2380">Kamer Kaya</a>,
+            <a href="https://www.linkedin.com/in/barisbatuhan/?originalSubdomain=tr">Baris Batuhan Topal</a>
+            <br>
+              <em> IEEE Signal Processing and Communications Applications (SIU), 2020 </em>
+            <br>
+            <a href="https://arxiv.org/pdf/2008.11454.pdf">pdf</a> /
+            <a href="https://github.com/barisbatuhan/Graph_Coloring_with_RL">code</a> /
+            <a href="./refs/voagcp.bib">bib</a>
+            <br>
+            <p>
+              We developed a ranking algorithm that uses metrics of degree 1/2/3, closeness centrality,
+              clustering coefficient, and page rank to rank the nodes in a graph. Then, we applied greedy coloring 
+              to the graph using the ranking as a guide, which resulted in significantly better colorings.
+              Furthermore, we tried to extend this idea using a model-free policy based reinforcement learning algorithm while 
+              parallelizing C++ backend using OpenMP.
+            </p>
+          </td>
+        </tr> 
+
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/GPT.png" width="230">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://github.com/berkerdemirel/GPT-from-scratch">
+              <papertitle>Implementation of a small GPT from scratch</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>
+            <br>
+            <a href="https://d4mucfpksywv.cloudfront.net/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">pdf</a> /
+            <a href="https://github.com/berkerdemirel/GPT-from-scratch">code</a>
+            <br>
+            <p>
+              I re-implemented <a href="https://karpathy.ai/">Andrej Karpathy's</a> <a href="https://github.com/karpathy/nanoGPT">nanoGPT</a>. It is designed to be simpler and easier to update. 
+              Performance evaluation is performed on Tiny Shakespeare Dataset and results can be found in the repository.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/mnist.png" width="230">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://github.com/berkerdemirel/UMAP">
+              <papertitle>Implementation of UMAP in Python</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>
+            <br>
+            <a href="https://arxiv.org/pdf/1802.03426.pdf">pdf</a> /
+            <a href="https://github.com/berkerdemirel/UMAP">code</a>
+            <br>
+            <p>
+              I implemented Uniform Manifold Approximation and Projection (UMAP) algorithm in Python from scratch 
+              and performed experiments on MNIST and Load Digits datasets.
+            </p>
+          </td>
+        </tr>
+
+
+        <tr>
+          <td style="padding:20px;width:25%;vertical-align:middle">
+              <img src="./photos/DOBFS.png" width="230">
+          </td>
+          <td style="padding:20px;width:75%;vertical-align:middle">
+            <a href="https://github.com/berkerdemirel/Parallel-Breadth-First-Search-OpenMP-and-CUDA">
+              <papertitle>Implementation of Direction-Optimized Breadth First Search using OpenMP and CUDA (Course Project)</papertitle>
+            </a>
+            <br>
+            <strong>Berker Demirel</strong>,
+            <a href="https://www.linkedin.com/in/negesarac/?originalSubdomain=tr">Naci Ege Sarac</a>
+            <br>
+            <a href="https://scottbeamer.net/pubs/beamer-sc2012.pdf">pdf</a> /
+            <a href="https://github.com/berkerdemirel/Parallel-Breadth-First-Search-OpenMP-and-CUDA">code</a>
+            <br>
+            <p>
+              We implemented Direction-Optimized BFS using OpenMP and CUDA.
+            </p>
+          </td>
+        </tr>
+        
+  <!-- Credits -->
+  <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+    <tr>
+      <td style="padding:0px">
+        <br>
+        <p style="text-align:right;font-size:small;">
+          Website template credits to <a href="https://jonbarron.info/">Jon Barron</a>.
+        </p>
+      </td>
+    </tr>
+  </tbody></table>
+</body>
+
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog · Berker Demirel</title>
+  <meta name="description" content="Short explainers of Berker Demirel's papers, each with a teaser video.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="Blog · Berker Demirel">
+  <meta property="og:description" content="Short explainers of papers, each with a teaser video.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/morphgen/poster.jpg">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body class="is-wide">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../">About</a>
+        <a href="../research/">Research</a>
+        <a href="../publications/">Publications</a>
+        <a href="./" aria-current="page">Blog</a>
+        <a href="../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="page-intro">
+      <h1>Blog</h1>
+    </header>
+
+    <ul class="card-grid">
+      <li>
+        <article class="paper-card" data-preview style="--hue: #58c4dd">
+          <div class="thumb">
+            <img src="lambda-jepa/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="lambda-jepa/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Representation learning · arXiv 2026</p>
+            <h3><a href="lambda-jepa/">λ-JEPA: Spectral Anti-Collapse Regularization for Self-Supervised Learning</a></h3>
+            <p>Anti-collapse objectives keep the projector high-rank but can leave the backbone collapsed. SACReg regularizes the backbone directly.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="paper-card" data-preview style="--hue: #cfa3e8">
+          <div class="thumb">
+            <img src="sample-quality/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="sample-quality/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Generation · NeurIPS 2026</p>
+            <h3><a href="sample-quality/">Assessing Sample Quality in Conditional Generation under Compositional Shift</a></h3>
+            <p>When the requested condition was never observed, there is no target distribution to compare against. A per-sample trust score needs only the training data.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="paper-card" data-preview style="--hue: #5cd0b3">
+          <div class="thumb">
+            <img src="morphgen/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="morphgen/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Generation · NeurIPS 2026</p>
+            <h3><a href="morphgen/">MorphGen: Controllable and Morphologically Plausible Generative Cell-Imaging</a></h3>
+            <p>A latent diffusion transformer that generates all six Cell Painting channels at full resolution, across cell types and perturbations.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="paper-card" data-preview style="--hue: #f0ac5f">
+          <div class="thumb">
+            <img src="ora/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="ora/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Generalization · NeurIPS 2025</p>
+            <h3><a href="ora/">Out-of-Distribution Detection with Relative Angles</a></h3>
+            <p>A post-hoc, hyperparameter-free OOD score: the angle between a feature and its projection onto the decision boundaries, seen from the ID mean.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="paper-card" data-preview style="--hue: #fc6255">
+          <div class="thumb">
+            <img src="decompl/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="decompl/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Group activity recognition · ICIP 2024</p>
+            <h3><a href="decompl/">DECOMPL: Decompositional Learning with Attention Pooling for Group Activity Recognition from a Single Volleyball Image</a></h3>
+            <p>Recognizing what a volleyball team is doing from one RGB frame, with attention pooling over players and a branch for their positions.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+      <li>
+        <article class="paper-card" data-preview style="--hue: #83c167">
+          <div class="thumb">
+            <img src="adrmx/poster.jpg" alt="" width="1280" height="720" loading="lazy">
+            <video src="adrmx/teaser.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <span class="badge"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>teaser</span>
+          </div>
+          <div class="body">
+            <p class="meta"><span class="dot"></span>Generalization · arXiv 2023</p>
+            <h3><a href="adrmx/">ADRMX: Additive Disentanglement of Domain Features with Remix Loss</a></h3>
+            <p>Domain generalization that keeps domain-specific features instead of discarding them, plus a latent-space remix augmentation.</p>
+            <span class="read">Read the post →</span>
+          </div>
+        </article>
+      </li>
+    </ul>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../assets/js/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assessing Sample Quality under Compositional Shift · Berker Demirel</title>
+  <meta name="description" content="A per-sample trust score for conditional generators that needs only the training distribution: global realism plus attribute-wise faithfulness, usable after or during generation.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/sample-quality/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="Assessing Sample Quality in Conditional Generation under Compositional Shift">
+  <meta property="og:description" content="Which generated samples can we trust when the requested condition was never observed? A trust score built from the training distribution alone.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/sample-quality/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/sample-quality/poster.jpg">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
+</head>
+<body class="is-wide is-post" style="--hue: #cfa3e8">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../../">About</a>
+        <a href="../../research/">Research</a>
+        <a href="../../publications/">Publications</a>
+        <a href="../" aria-current="page">Blog</a>
+        <a href="../../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <article>
+      <header class="post-head">
+        <p class="kicker"><span class="dot"></span><a href="../../research/#generation">Generation</a><span aria-hidden="true">·</span><a href="../../research/#generalization">Generalization</a><span aria-hidden="true">·</span><span>NeurIPS 2026</span></p>
+        <h1>Assessing Sample Quality in Conditional Generation under Compositional Shift</h1>
+        <p class="authors"><span class="me">Berker Demirel</span>, <a href="https://vale.maiorca.xyz/">Valentino Maiorca</a>, <a href="https://openreview.net/profile?id=~Marco_Fumero1">Marco Fumero</a>, <a href="https://karaletsos.com/">Theofanis Karaletsos</a>, <a href="https://www.francescolocatello.com/">Francesco Locatello</a></p>
+        <p class="affil">Institute of Science and Technology Austria (ISTA) · Pyramidal Inc · Achira Inc</p>
+        <div class="res">
+          <a class="is-primary" href="https://arxiv.org/abs/2606.09601">paper</a>
+          <a href="https://github.com/berkerdemirel/faithful-cond-gen">code</a>
+          <a href="#cite">cite</a>
+        </div>
+      </header>
+
+      <figure class="teaser">
+        <div class="frame">
+          <video src="teaser.mp4" poster="poster.jpg" controls muted loop playsinline preload="metadata" data-autoplay></video>
+        </div>
+        <figcaption>Teaser · 45 s · muted</figcaption>
+      </figure>
+
+      <div class="post-layout">
+        <aside class="post-toc" aria-label="On this page"><nav><p>On this page</p><ol></ol></nav></aside>
+        <div class="post-body">
+          <div class="tldr">
+            <span class="kicker">TL;DR</span>
+            <p>Conditional generators are most useful for conditions nobody has observed, and that is exactly where FID or KID cannot be computed, because they need real samples of the target. We score each generated sample using only the training distribution: a global realism term plus an attribute-by-attribute faithfulness term. The score filters, ranks, and can even reject samples before they are decoded; on CelebA and RxRx1 the samples it keeps improve ΔKID by 39–44% over random subsets of the same size.</p>
+          </div>
+
+          <h2 id="problem" data-toc="The problem">Evaluating what has never been measured</h2>
+          <p>Conditional diffusion models can generate images for a requested condition: a class label, a tuple of attributes, or a biological perturbation applied to a given cell type. In scientific settings, the appeal is not to reproduce experiments that have already been run, but to explore conditions that are rare, expensive, or not yet observed. If we want a cell population with certain phenotypic properties, a generator that simulates perturbations <em>in silico</em> could help decide which ones to test in the wet lab first.</p>
+          <p>That only helps if we can tell which generated samples to believe. They need to be visually realistic <em>and</em> faithful to the requested condition, even though the target population has never been seen. Here evaluation runs into a circularity. Distributional metrics such as FID and KID, and their conditional variants, compare generated samples to real samples from the target distribution. In the extrapolative regime, that distribution is unavailable by definition. Such metrics remain useful as controlled validation tools in benchmarks where we deliberately hold real data out, but they cannot decide whether one particular sample should be trusted at deployment time.</p>
+          <p>So we asked a different question: <strong>what information about sample quality is identifiable from the real training distribution alone?</strong></p>
+
+          <h2 id="score" data-toc="The trust score">Two things we can still check</h2>
+          <p>We focus on two quantities that stay observable without target samples, and that correspond to two separable failure modes. A sample can be realistic but wrong for the requested condition; or it can express the requested condition while falling outside the manifold of real data. Existing post-hoc tools usually see only one side: out-of-distribution and one-class scores measure global compatibility with an in-distribution set, while prompt- or classifier-based alignment scores measure agreement with a condition. We combine both in a single score, computed in the feature space of a pretrained extractor \(\Phi\), from the generated sample and real training-set statistics only.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-pipeline.png" alt="Pipeline diagram: a conditional generator is asked for an unseen combination of attributes; the candidate image is encoded by a feature extractor; a realism term checks closeness to the training distribution and a faithfulness term checks closeness to the requested attribute values; their sum T ranks candidates, and those above a threshold are rejected." width="1823" height="653" loading="lazy"></div>
+            <figcaption><b>Figure 1.</b> Trust scoring under compositional shift. The generator \(G_\theta\) is queried with an unseen joint condition \(a^\star\). Features from \(\Phi\) give a realism term \(R\) (proximity to the real training distribution) and a faithfulness term \(F\) (alignment with the requested attribute values); \(T = R + F\) ranks, filters, or abstains. From the paper.</figcaption>
+          </figure>
+
+          <p>Concretely, let \(\mathcal{A}_1, \dots, \mathcal{A}_K\) be finite attribute-value spaces and \(a^\star = (a^\star_1, \dots, a^\star_K)\) the requested joint condition. That tuple may be absent from training while each of its individual values appears in other real samples: this is compositional support shift. We work with normalized features \(y(x) = \Phi(x) / \lVert \Phi(x) \rVert_2\), and fit every mean, covariance, precision matrix, and calibration constant on normalized <em>real</em> training features.</p>
+
+          <h3>Global realism</h3>
+          <p>With \(\mu_{\text{real}}\) and \(\Sigma_{\text{real}}\) the mean and regularized covariance of the real features, realism is a standardized Mahalanobis energy:</p>
+          <div class="eq">$$E_{\text{real}}(y) = (y - \mu_{\text{real}})^\top \Sigma_{\text{real}}^{-1} (y - \mu_{\text{real}}),$$</div>
+          <div class="eq">$$R(y) = \frac{E_{\text{real}}(y) - m_R}{s_R},$$</div>
+          <p>where \(m_R\) and \(s_R\) are the mean and standard deviation of \(E_{\text{real}}\) on real calibration features. Larger \(R\) means less realistic.</p>
+
+          <h3>Attribute-wise faithfulness</h3>
+          <p>The key idea is to never match a sample against the unseen condition as a whole. Instead, each attribute is checked on its own: is the requested value favored over the plausible alternatives? For every attribute \(k\) and value \(v\), we take the real-data prototype \(\eta_{k,v} = \mathbb{E}[\,y \mid a_k = v\,]\), estimate a shared precision matrix \(P_k \succ 0\) from the pooled within-value covariance, and measure</p>
+          <div class="eq">$$d_k(y; v) = (y - \eta_{k,v})^\top P_k\, (y - \eta_{k,v}),$$</div>
+          <p>and, for the requested value \(t\), the target-vs-competitor margin</p>
+          <div class="eq">$$M_k(y; t) = d_k(y; t) - \min_{v \neq t} d_k(y; v).$$</div>
+          <p>A negative margin \(M_k(y; t)\) means the sample is closer to the requested value \(t\) than to every competing value of attribute \(k\). Each margin is standardized on real samples that carry that value, \(F_k(y;t) = (M_k(y;t) - m_{k,t}) / s_{k,t}\), and averaged over attributes. The trust score is the sum of the two parts:</p>
+          <div class="eq">$$F(y; a^\star) = \frac{1}{K} \sum_{k=1}^{K} F_k(y; a^\star_k),$$</div>
+          <div class="eq">$$T(y; a^\star) = R(y) + F(y; a^\star).$$</div>
+          <p>Lower is more trusted. The decomposition stays interpretable: \(R\) catches samples that are globally far from real features, and \(F\) catches samples that look real but do not match the requested attributes. The small sketch below plays this out in two dimensions. It is a toy, not the paper's setup, but the score inside follows the same recipe.</p>
+
+          <figure class="viz fig is-wide" data-viz="trust">
+            <div class="viz-stage is-flipped">
+              <div class="viz-panel">
+                <h3>Request a condition</h3>
+                <div class="cond-grid" data-role="grid" role="group" aria-label="Condition grid: cell type by perturbation"></div>
+                <p class="cg-axis">columns: cell type · rows: perturbation</p>
+                <p class="viz-note">Shaded cells were observed in training. Every value of each attribute appears with the reference value (c1 or p1) of the other, but the “?” combinations never do.</p>
+                <div class="viz-readout" aria-live="polite">
+                  <span>kept <b data-read="kept">–</b></span>
+                  <span>faithful, kept <b data-read="prec-kept">–</b></span>
+                  <span>faithful, all <b data-read="prec-all">–</b></span>
+                </div>
+              </div>
+              <div class="viz-panel">
+                <h3>Generated samples</h3>
+                <div class="viz-canvas-wrap">
+                  <canvas data-role="features" role="img" aria-label="Feature space showing real training clusters, the requested target region, and generated samples marked as kept or rejected by the trust score."></canvas>
+                  <div class="viz-tip" hidden></div>
+                </div>
+                <ul class="viz-legend">
+                  <li><span class="sw" style="color: var(--ink-faint)"></span>real training data</li>
+                  <li><span class="sw" style="color: var(--accent)"></span>kept</li>
+                  <li><span class="sw is-ring" style="color: var(--ink-faint)"></span>rejected</li>
+                  <li><span class="sw is-star" style="color: var(--ink-soft)"></span>malformed sample</li>
+                  <li><span class="sw is-ring" style="color: var(--ink)"></span>requested target</li>
+                </ul>
+              </div>
+            </div>
+            <div class="viz-controls">
+              <button class="btn" type="button" data-role="generate">
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M10 6a4 4 0 1 1-1.2-2.85M10 1.5v2.2H7.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Generate again
+              </button>
+              <label>Keep the most trusted <input type="range" min="10" max="100" step="5" value="60" aria-label="Fraction of samples to keep"> <output>60%</output></label>
+            </div>
+            <figcaption><strong>Trusting samples nobody has seen.</strong> Pick a condition and the toy generator denoises 60 samples. Some land on the requested combination, some leak an attribute toward a combination it has seen, and some are malformed. Each sample gets a trust score T = R + F: realism R is a Mahalanobis distance to the real feature distribution, and faithfulness F asks, attribute by attribute, whether the sample is closer to the requested value than to the alternatives. Ranking by T and keeping the most trusted samples raises the share of faithful ones, without ever seeing real data for the “?” cells. Hover a sample for its scores.</figcaption>
+          </figure>
+
+          <h2 id="theory" data-toc="Identifiability">What the training data can and cannot tell us</h2>
+          <p>It helps to be precise about the limits first. If the requested condition \(a^\star\) is missing from the real data, the conditional distribution of features at \(a^\star\) is not identifiable from the observed data without assumptions that relate observed and unobserved conditions (Proposition 1, stated informally in the paper). No post-hoc score built from the observed real distribution can therefore certify full conditional fidelity to a missing target.</p>
+          <p>What does survive is a weaker, attribute-level comparison, provided the training support contains enough variation to separate the attributes' effects. We call the needed condition <strong>reference coverage</strong>: there is a reference condition \(\bar a\) such that every value of every attribute has been observed together with the reference values of all other attributes. Writing \(a_{-k}\) for all attributes except \(a_k\), for every attribute \(k\) and every value \(v \in \mathcal{A}_k\):</p>
+          <div class="eq">$$\mathbb{P}\big(a_k = v,\ a_{-k} = \bar a_{-k}\big) > 0.$$</div>
+          <p>Without it, attributes that only ever appear in fixed combinations are support-confounded: the data cannot say which attribute caused an observed change. Reference coverage avoids this while using the smallest possible set of observed joint conditions (the paper proves this minimality in the appendix). Under reference coverage, a comparator anchored at the reference context, with prototypes \(\mu^{\text{ref}}_{k,v} = \mathbb{E}[\,y \mid a_k = v,\ a_{-k} = \bar a_{-k}\,]\), is point-identified from the observed data (Proposition 2).</p>
+          <p>The implemented score uses the pooled prototypes \(\eta_{k,v}\) instead, because pooling uses every real sample with \(a_k = v\) and is more sample-efficient. The appendix gives sufficient conditions under which the pooled comparator makes the same attribute-wise decisions as the anchored one, and checks agreement empirically: it ranges from 0.990 to 1.000 across CelebA attributes and is 0.997 for RxRx1 cell type. The finer-grained RxRx1 siRNA decision is the main exception, with agreement 0.803.</p>
+
+          <h2 id="results" data-toc="Results">Does it pick better samples?</h2>
+          <p>We evaluate in the regime the score is designed for: it is calibrated on real training-support features and never sees real samples from the requested target at scoring time. The main scientific benchmark is <strong>RxRx1</strong>, a fluorescence microscopy dataset with 4 cell types and 1138 siRNA perturbations, i.e. 4552 cell-type × perturbation conditions; after filtering for enough real samples to evaluate reliably, the test set has 25 conditions unseen during training and 25 seen ones. For a controlled testbed we use a subset of <strong>CelebA</strong> with 4 binary attributes (Male, Smiling, Blond_Hair, Eyeglasses), giving 16 conditions. Training there sees only the all-zero reference and the four single-attribute conditions, which is exactly reference coverage, while all 16 conditions are queried at generation time.</p>
+          <p>For each setting we train a vanilla conditional diffusion model (SiT-B/2) and two REPA variants aligned to DINOv3 or SigLIP. Quality is measured with KID, which does use the held-out real target samples as ground truth, unlike the trust score: \(\Delta\text{KID} = \text{KID}(\text{gen}, \text{real}_A) - \text{KID}(\text{real}_B, \text{real}_A)\), always in a fixed DINOv3 feature space.</p>
+
+          <h3>Filtering</h3>
+          <p>Borrowing the FPR95 convention from out-of-distribution detection, we accept a generated sample if its trust score is below the 95th percentile of trust scores on real samples, and compare the accepted subset with a condition-matched random subset of the same size.</p>
+
+          <figure class="fig is-wide">
+            <div class="table-wrap">
+              <table class="results">
+                <caption><b>Table 1 of the paper.</b> Post-generation filtering under support shift. Accept% is the share of generations that pass the real-data threshold; ΔKID (lower is better) for trust-selected vs. random subsets of the same size; Δ% is the relative improvement; ρ(T) is the condition-level Spearman correlation between mean trust and ΔKID.</caption>
+                <thead>
+                  <tr><th>Dataset · model</th><th>Accept%</th><th>ΔKID<sub>trust</sub></th><th>ΔKID<sub>random</sub></th><th>Δ%</th><th>ρ(T)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>CelebA · Vanilla</td><td>58.7</td><td>0.224 ± .009</td><td>0.368 ± .020</td><td>+39.1</td><td>0.96</td></tr>
+                  <tr><td>CelebA · REPA (DINOv3)</td><td>55.4</td><td>0.228 ± .010</td><td>0.401 ± .031</td><td>+43.1</td><td>0.96</td></tr>
+                  <tr><td>CelebA · REPA (SigLIP)</td><td>56.1</td><td>0.239 ± .018</td><td>0.423 ± .020</td><td>+43.6</td><td>0.96</td></tr>
+                  <tr><td>RxRx1 · Vanilla</td><td>4.4</td><td>0.196 ± .006</td><td>0.323 ± .013</td><td>+39.4</td><td>0.90</td></tr>
+                  <tr><td>RxRx1 · REPA (DINOv3)</td><td>5.5</td><td>0.197 ± .006</td><td>0.333 ± .019</td><td>+40.8</td><td>0.90</td></tr>
+                  <tr><td>RxRx1 · REPA (SigLIP)</td><td>6.1</td><td>0.181 ± .003</td><td>0.312 ± .019</td><td>+42.0</td><td>0.87</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+
+          <p>On CelebA the selected subsets improve ΔKID by 39–44% while keeping roughly 55–59% of generations. On RxRx1 the filter is far stricter, accepting only 4–6% of samples, yet the improvement is a similar 39–42%. The same table shows a second use: the mean trust of a condition is a strong predictor of how hard that condition is, with condition-level rank correlations of 0.87–0.96.</p>
+          <p>In an appendix ablation, alternative scorers in the same feature space (a per-attribute linear probe, a per-attribute nearest-neighbour distance, and CLIP alignment on CelebA) all produce near-degenerate real-data thresholds that accept almost every sample. Only the calibrated Mahalanobis score gave both a usable acceptance rate and a substantial KID improvement.</p>
+
+          <h3>Ranking</h3>
+          <p>The score is useful beyond a single threshold. We split generated samples into class-balanced trust deciles and train a condition classifier on each decile separately, then evaluate it on held-out real data.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-deciles.png" alt="Two line plots over trust deciles from 0 (best) to 9 (worst). Left: KID rises from about 0.3 to about 1.17. Right: 16-way downstream accuracy falls from about 0.60 to about 0.50." width="1800" height="630" loading="lazy"></div>
+            <figcaption><b>Figure 2.</b> CelebA, binned by trust decile (REPA-DINOv3, held-out support, DINOv3 scoring). Left: ΔKID rises monotonically from the most to the least trusted decile. Right: a 16-way condition classifier trained on each decile gets worse as trust drops. From the paper.</figcaption>
+          </figure>
+
+          <p>On CelebA, ΔKID degrades roughly fourfold from the best to the worst decile, and downstream accuracy drops by about 10% when training on the least trusted samples. RxRx1 shows the same ordering for KID and downstream classification (reported in the appendix).</p>
+
+          <h3>Biology, measured independently</h3>
+          <p>DINOv3 is a learned encoder, so we also checked trust selection in CellProfiler space: 621 interpretable per-cell morphology measurements computed from segmented images, independent of any validation network. For each generated cell image we compute its distance to the centroid of the matching real condition, standardized by the spread between random halves of the real data. A value of 0 is typical real-to-real variation; anything above is excess deviation.</p>
+
+          <figure class="fig is-wide">
+            <div class="table-wrap">
+              <table class="results">
+                <caption><b>Table 2 of the paper.</b> Real-spread-normalized CellProfiler distance on RxRx1 (lower is better). Accept% is the share of generations passing the real-data threshold; Δ% is the reduction from the random subset to the trust-selected one.</caption>
+                <thead>
+                  <tr><th>Model · split</th><th>Accept%</th><th>z̄<sub>trust</sub></th><th>z̄<sub>random</sub></th><th>Δ%</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Vanilla · seen</td><td>66.3</td><td>0.055</td><td>0.111</td><td>+50</td></tr>
+                  <tr><td>Vanilla · unseen</td><td>21.9</td><td>0.583</td><td>0.712</td><td>+18</td></tr>
+                  <tr><td>REPA (DINOv3) · seen</td><td>61.2</td><td>0.024</td><td>0.137</td><td>+83</td></tr>
+                  <tr><td>REPA (DINOv3) · unseen</td><td>21.0</td><td>0.535</td><td>0.755</td><td>+29</td></tr>
+                  <tr><td>REPA (SigLIP) · seen</td><td>65.7</td><td>0.032</td><td>0.126</td><td>+75</td></tr>
+                  <tr><td>REPA (SigLIP) · unseen</td><td>23.5</td><td>0.827</td><td>1.020</td><td>+19</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+
+          <p>Trust selection improves morphology alignment in all six model/split settings, with bootstrap confidence intervals strictly below zero. On seen conditions the selected samples are nearly real-like: for REPA-DINOv3 they sit only 0.024σ beyond typical real variation. Unseen conditions drift further from real morphology, but selection still removes 18–29% of the excess distance. The per-feature breakdown points to biologically meaningful axes, such as per-cell texture autocorrelation, image-level granularity, total cell-segmentation area, and cytoplasm shape regularity. Decile experiments in CellProfiler space tell the same story: more trusted deciles train better cell-type and condition classifiers.</p>
+
+          <h2 id="during" data-toc="During generation">Abstaining before the image exists</h2>
+          <p>Post-generation scoring needs a full denoising run, the VAE decoder, and a pass through \(\Phi\). Because the score lives in a fixed real-data geometry, we can instead evaluate it on the generator's internal representations. A shallow MLP translator \(g_{\phi,\ell}\) maps the representation at layer \(\ell\) and denoising step \(\tau\) into the \(\Phi\) feature space; it is trained on real training samples with an objective that preserves the shared-covariance Mahalanobis geometry the score relies on. At inference time we evaluate the same \(T\) on the mapped feature, and abstain as soon as \(T(y^{\text{map}}_{\ell,\tau}; a^\star) > \kappa_{\ell,\tau}\) for a layer- and step-specific threshold.</p>
+
+          <figure class="fig is-wide">
+            <div class="table-wrap">
+              <table class="results">
+                <caption><b>Table 3 of the paper, RxRx1 rows.</b> Trust scored during generation, from internal features. REPA rows score directly with REPA's aligned features; translator rows use our geometry-preserving map. Same protocol as Table 1.</caption>
+                <thead>
+                  <tr><th>Features · model</th><th>Accept%</th><th>ΔKID<sub>trust</sub></th><th>ΔKID<sub>random</sub></th><th>Δ%</th><th>ρ(T)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>REPA · REPA (DINOv3)</td><td>1.4</td><td>0.537 ± .032</td><td>0.329 ± .037</td><td>−63.4</td><td>0.09</td></tr>
+                  <tr><td>REPA · REPA (SigLIP)</td><td>3.9</td><td>0.564 ± .022</td><td>0.293 ± .023</td><td>−92.3</td><td>0.13</td></tr>
+                  <tr class="is-ours"><td>translator · Vanilla</td><td>38.4</td><td>0.260 ± .003</td><td>0.346 ± .016</td><td>+24.9</td><td>0.78</td></tr>
+                  <tr class="is-ours"><td>translator · REPA (DINOv3)</td><td>62.3</td><td>0.246 ± .003</td><td>0.372 ± .037</td><td>+33.8</td><td>0.88</td></tr>
+                  <tr class="is-ours"><td>translator · REPA (SigLIP)</td><td>60.5</td><td>0.235 ± .011</td><td>0.329 ± .018</td><td>+28.7</td><td>0.70</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+
+          <p>REPA-trained generators already align internal states to a pretrained teacher, so they look like a free baseline. That baseline partly works on CelebA (ρ(T) = 0.95, +31% ΔKID) but fails on RxRx1, where it selects worse samples than random. REPA's cosine alignment matches features without preserving the covariance structure the Mahalanobis score needs. The translator restores filtering on RxRx1, with 25–34% ΔKID improvements and ρ(T) up to 0.88, and matches post-generation filtering on CelebA. Scoring also works early: on CelebA with a 250-step sampler, the filter reaches a 33% ΔKID improvement at step 83 while saving 67% of the denoising compute, and around step 166 it matches the post-generation result while still saving 34%.</p>
+
+          <h2 id="limits" data-toc="Limitations">Limitations and what is next</h2>
+          <ul>
+            <li><strong>Discrete attributes, sufficient coverage.</strong> The theory covers discrete attributes under reference coverage. Continuous conditioning variables and weaker identifiability conditions are open.</li>
+            <li><strong>The feature space matters.</strong> The score inherits the geometry of \(\Phi\). In OpenPhenom's feature space it fails (ρ ≈ 0.05): its within-class covariance is effectively collapsed, around 4 effective dimensions compared with around 16 for DINOv3, and the precision weighting then amplifies noise rather than signal.</li>
+            <li><strong>Fine-grained attributes are harder.</strong> The pooled comparator agrees less with the identified, reference-anchored one on the RxRx1 siRNA attribute than on cell type.</li>
+            <li><strong>Abstaining is not steering.</strong> Today the score rejects poor samples. A natural next step is to use it to move generations toward high-trust regions.</li>
+          </ul>
+
+          <h2 id="cite">Citation</h2>
+          <div class="cite">
+            <button class="btn copy" type="button" data-copy="bibtex">Copy</button>
+<pre id="bibtex">@inproceedings{demirel2026assessing,
+  title={Assessing Sample Quality in Conditional Generation under Compositional Shift},
+  author={Berker Demirel and Valentino Maiorca and Marco Fumero and Theofanis Karaletsos and Francesco Locatello},
+  booktitle={The Fortieth Annual Conference on Neural Information Processing Systems},
+  year={2026},
+  url={https://arxiv.org/abs/2606.09601}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/site.js" defer></script>
+  <script src="../../assets/js/research-viz.js" defer></script>
+</body>
+</html>

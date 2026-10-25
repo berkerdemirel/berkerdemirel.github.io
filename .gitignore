@@ -1,1 +1,4 @@
 .DS_Store
+# Local source material (paper PDFs, original video exports); not published
+_sources/
+__pycache__/

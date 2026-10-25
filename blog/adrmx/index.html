@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADRMX · Berker Demirel</title>
+  <meta name="description" content="ADRMX keeps domain-specific features alongside domain-invariant ones through an additive decomposition, and uses that structure to remix samples across domains in latent space.">
+  <meta name="author" content="Berker Demirel">
+  <link rel="canonical" href="https://berkerdemirel.github.io/blog/adrmx/">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4ebd9">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#13171a">
+  <meta property="og:title" content="ADRMX: Additive Disentanglement of Domain Features with Remix Loss">
+  <meta property="og:description" content="Domain generalization that keeps domain-specific features instead of discarding them, plus a latent-space remix augmentation.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://berkerdemirel.github.io/blog/adrmx/">
+  <meta property="og:image" content="https://berkerdemirel.github.io/blog/adrmx/poster.jpg">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <script>
+    (() => { try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }], throwOnError: false })"></script>
+</head>
+<body class="is-wide is-post" style="--hue: #83c167">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../../">
+        <svg class="mark" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 14V2.5M6.2 14V5.5M9.9 14V8.5M13.6 14v-2.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Berker Demirel
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../../">About</a>
+        <a href="../../research/">Research</a>
+        <a href="../../publications/">Publications</a>
+        <a href="../" aria-current="page">Blog</a>
+        <a href="../../cv/">CV</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4A8.4 8.4 0 1 1 10.6 3.4a6.8 6.8 0 0 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.7"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></g></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <article>
+      <header class="post-head">
+        <p class="kicker"><span class="dot"></span><a href="../../research/#generalization">Generalization</a><span aria-hidden="true">·</span><span>arXiv 2023</span></p>
+        <h1>ADRMX: Additive Disentanglement of Domain Features with Remix Loss</h1>
+        <p class="authors"><span class="me">Berker Demirel</span>, <a href="https://sites.google.com/view/erchan-aptoula/">Erchan Aptoula</a>, <a href="http://myweb.sabanciuniv.edu/hozkan/">Huseyin Ozkan</a></p>
+        <p class="affil">Sabanci University</p>
+        <div class="res">
+          <a class="is-primary" href="https://arxiv.org/abs/2308.06624">paper</a>
+          <a href="https://github.com/berkerdemirel/adrmx">code</a>
+          <a href="#cite">cite</a>
+        </div>
+      </header>
+
+      <figure class="teaser">
+        <div class="frame">
+          <video src="teaser.mp4" poster="poster.jpg" controls muted loop playsinline preload="metadata" data-autoplay></video>
+        </div>
+        <figcaption>Teaser · 44 s · muted</figcaption>
+      </figure>
+
+      <div class="post-layout">
+        <aside class="post-toc" aria-label="On this page"><nav><p>On this page</p><ol></ol></nav></aside>
+        <div class="post-body">
+          <div class="tldr">
+            <span class="kicker">TL;DR</span>
+            <p>Domain generalization methods usually keep only the features that all training domains share. ADRMX keeps the domain-specific ones too: a label encoder and a domain encoder run in parallel, and subtracting the second from the first gives domain-invariant features. Because the decomposition is additive, we can also add another domain's features back onto the invariant part, which gives new training samples in latent space. On DomainBed, ADRMX has the best average accuracy across seven datasets (67.6%).</p>
+          </div>
+
+          <h2 id="problem">The problem</h2>
+          <p>The usual assumption that training and test data come from the same distribution breaks easily in deployment: backgrounds, illumination, occlusion, scale, and camera angle all change. Domain generalization makes this explicit. We get several labelled source domains \(\mathcal{D} = \{D_1, \dots, D_S\}\) and must perform well on a target domain \(D_T\) that is never seen during training, not even unlabelled. In benchmarks such as PACS this is evaluated by holding out each domain in turn and averaging.</p>
+          <p>Most existing methods answer with invariance: extract the features common to all source domains and suppress the rest, so that whatever is specific to one domain cannot mislead the model on another. That is a reasonable default, but it assumes domain-specific information is useless for the label. It is not always. Some domains share traits with each other even when they differ a lot from the rest.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-pacs.jpg" alt="Four PACS images: an elephant painting, a cartoon elephant, a horse painting, and a cartoon horse." width="1376" height="320" loading="lazy"></div>
+            <figcaption><b>Figure 1.</b> Elephants (left pair) and horses (right pair) from the art and cartoon domains of PACS. The two domains share color patterns and object compositions, so features learned from paintings can help recognize objects in cartoons. Images from Figure 1 of the paper.</figcaption>
+          </figure>
+
+          <p>Our hypothesis is that domain-specific, label-relevant features can act as an additional guide on top of the invariant ones. The question is how to keep them without letting them take over.</p>
+
+          <h2 id="idea">Additive disentanglement</h2>
+          <p>ADRMX uses two backbones on the same image \(x_i\): a label encoder trained with cross-entropy on class labels, and a domain encoder trained with cross-entropy on domain labels,</p>
+          <div class="eq">$$ x_{\text{label}} = f_{\theta_{\text{label}}}(x_i), \qquad x_{\text{domain}} = f_{\theta_{\text{domain}}}(x_i). $$</div>
+          <p>Given these objectives, \(x_{\text{label}}\) captures everything about the image that is related to its label, domain-variant or not, while \(x_{\text{domain}}\) captures what is specific to its domain. We model their relationship additively and obtain domain-invariant features by element-wise subtraction:</p>
+          <div class="eq">$$ x_{\text{dinv}} = x_{\text{label}} - x_{\text{domain}}. $$</div>
+          <p>The subtraction is only meaningful if \(x_{\text{dinv}}\) is pushed to keep the label and lose the domain, so it gets three objectives of its own: a cross-entropy loss for the class, an adversarial domain-discrimination loss, and an in-batch supervised contrastive loss that pulls together samples of the same class. The contrastive loss is applied to both \(x_{\text{label}}\) and \(x_{\text{dinv}}\):</p>
+          <div class="eq">$$ \mathcal{L}_{\text{cont}} = \sum_{i=1}^{N} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(z_i \cdot z_p)}{\sum_{a \in A(i)} \exp(z_i \cdot z_a)}, $$</div>
+          <p>where \(A(i)\) indexes all samples in the batch except \(i\), \(P(i)\) indexes its positives (same class), and each \(z\) is a normalized feature vector. The net effect is that the label encoder is free to use domain-specific information that helps classification, while the decomposition makes that information explicit and removable.</p>
+
+          <figure class="fig is-wide">
+            <div class="plate"><img src="fig-architecture.png" alt="ADRMX architecture. Training: a label encoder and a domain encoder produce x_label and x_domain; their difference x_dinv feeds a label classifier, a domain classifier, and a contrastive loss; x_dinv plus another sample's domain features gives x_remixed, classified by the shared label classifier. Test: label encoder followed by label classifier." width="1575" height="906" loading="lazy"></div>
+            <figcaption><b>Figure 2.</b> ADRMX at training time (a) and test time (b). Domain-invariant features are the label features minus the domain features. The remix branch adds the domain features of another sample with the same label and reuses the label classifier. At test time only the label encoder and label classifier are used. From Figure 2 of the paper.</figcaption>
+          </figure>
+
+          <h2 id="remix">Remixing in latent space</h2>
+          <p>The additive structure gives us an augmentation for free. Take two samples \(x\) and \(x'\) with the same label but from different domains. Adding the domain features of the second to the invariant features of the first,</p>
+          <div class="eq">$$ x_{\text{remixed}} = x_{\text{dinv}} + x'_{\text{domain}}, $$</div>
+          <p>produces a feature vector that mimics what the label encoder might output for "this object, rendered in that domain". These remixed samples are built from in-batch pairs and classified by the same label classifier that maps \(x_{\text{label}}\) to logits, with a cross-entropy remix loss</p>
+          <div class="eq">$$ \mathcal{L}_{\text{remix}} = -\sum y_i \log(\hat{y}_i), \qquad \hat{y} = f_{\text{clf}}(x_{\text{remixed}}). $$</div>
+          <p>This is latent-space data augmentation in the spirit of mixup, but it combines content and domain rather than interpolating whole samples. Because the classifier weights are shared, it adds no parameters.</p>
+
+          <h3>Training</h3>
+          <p>Training alternates between two objectives, as in a generator-discriminator setup. The generator step combines the classification, remix, and contrastive losses with the negated, \(\lambda\)-scaled domain-discrimination loss on \(x_{\text{dinv}}\); the discriminator step only learns to classify the domain of \(x_{\text{dinv}}\):</p>
+          <div class="eq">$$ \begin{aligned} \mathcal{L}_{\text{total\_gen}} &= \mathcal{L}_{\text{CE}} + \mathcal{L}_{\text{remix}} + \mathcal{L}_{\text{cont}} - \lambda\,\mathcal{L}_{\text{disc}}, \\ \mathcal{L}_{\text{total\_disc}} &= \mathcal{L}_{\text{disc}}. \end{aligned} $$</div>
+          <p>Following the GAN-like variant of domain-adversarial training (rather than a gradient-reversal layer), the two steps alternate throughout training. Both encoders are ImageNet-pretrained ResNet-50s with 2048-dimensional outputs, optimized with Adam.</p>
+
+          <h2 id="results">What we found</h2>
+          <p>We evaluate in DomainBed, which compares algorithms under identical conditions: the same backbone, data augmentation, a limited random hyperparameter search, and model selection on validation data from the training domains only, so the test domain is never peeked at. Each configuration is averaged over three runs. The benchmark covers seven datasets, from ColoredMNIST and RotatedMNIST to PACS, VLCS, OfficeHome, TerraIncognita, and DomainNet.</p>
+
+          <div class="fig is-wide">
+            <div class="table-wrap">
+              <table class="results">
+                <caption>Accuracy (%) on DomainBed with training-domain validation. Bold marks the best entry in each column. From Table 1 of the paper.</caption>
+                <thead>
+                  <tr><th>Method</th><th>CMNIST</th><th>RMNIST</th><th>VLCS</th><th>PACS</th><th>OfficeHome</th><th>TerraInc.</th><th>DomainNet</th><th>Avg</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="is-ours"><td>ADRMX (ours)</td><td>52.5</td><td>97.8</td><td>78.5</td><td>85.3</td><td>68.3</td><td>47.4</td><td class="best">43.1</td><td class="best">67.6</td></tr>
+                  <tr><td>CORAL</td><td>51.5</td><td>98.0</td><td class="best">78.8</td><td>86.2</td><td class="best">68.7</td><td>47.6</td><td>41.5</td><td>67.5</td></tr>
+                  <tr><td>SagNet</td><td>51.7</td><td>98.0</td><td>77.8</td><td class="best">86.3</td><td>68.1</td><td class="best">48.6</td><td>40.3</td><td>67.2</td></tr>
+                  <tr><td>SelfReg</td><td>52.1</td><td>98.0</td><td>77.8</td><td>85.6</td><td>67.9</td><td>47.0</td><td>41.5</td><td>67.1</td></tr>
+                  <tr><td>Mixup</td><td>52.1</td><td>98.0</td><td>77.4</td><td>84.6</td><td>68.1</td><td>47.9</td><td>39.2</td><td>66.7</td></tr>
+                  <tr><td>MLDG</td><td>51.5</td><td>97.9</td><td>77.2</td><td>84.9</td><td>66.8</td><td>47.7</td><td>41.2</td><td>66.7</td></tr>
+                  <tr><td>ERM</td><td>51.5</td><td>98.0</td><td>77.5</td><td>85.5</td><td>66.5</td><td>46.1</td><td>40.9</td><td>66.6</td></tr>
+                  <tr><td>MTL</td><td>51.4</td><td>97.9</td><td>77.2</td><td>84.6</td><td>66.4</td><td>45.6</td><td>40.6</td><td>66.2</td></tr>
+                  <tr><td>RSC</td><td>51.7</td><td>97.6</td><td>77.1</td><td>85.2</td><td>65.5</td><td>46.6</td><td>38.9</td><td>66.1</td></tr>
+                  <tr><td>ARM</td><td class="best">56.2</td><td class="best">98.2</td><td>77.6</td><td>85.1</td><td>64.8</td><td>45.5</td><td>35.5</td><td>66.1</td></tr>
+                  <tr><td>DANN</td><td>51.5</td><td>97.8</td><td>78.6</td><td>83.6</td><td>65.9</td><td>46.7</td><td>38.3</td><td>66.1</td></tr>
+                  <tr><td>VREx</td><td>51.8</td><td>97.9</td><td>78.3</td><td>84.9</td><td>66.4</td><td>46.4</td><td>33.6</td><td>65.6</td></tr>
+                  <tr><td>CDANN</td><td>51.7</td><td>97.9</td><td>77.5</td><td>82.6</td><td>65.8</td><td>45.8</td><td>38.3</td><td>65.6</td></tr>
+                  <tr><td>IRM</td><td>52.0</td><td>97.7</td><td>78.5</td><td>83.5</td><td>64.3</td><td>47.6</td><td>33.9</td><td>65.4</td></tr>
+                  <tr><td>GroupDRO</td><td>52.1</td><td>98.0</td><td>76.7</td><td>84.4</td><td>66.0</td><td>43.2</td><td>33.3</td><td>64.8</td></tr>
+                  <tr><td>MMD</td><td>51.5</td><td>97.9</td><td>77.5</td><td>84.6</td><td>66.3</td><td>42.2</td><td>23.4</td><td>63.3</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p>ADRMX reaches the highest average accuracy, 67.6%, ahead of CORAL (67.5%) and ERM (66.6%), and the best result on DomainNet, the largest dataset. Against the other adversarial methods the average improves by 0.4 points over SagNet, 1.5 over DANN, and 2.0 over CDANN. The margins are small, as is typical in DomainBed, and on most individual datasets another method is best. ADRMX is within roughly a point of the best method on every dataset except ColoredMNIST, and clearly ahead on DomainNet, which is what lifts its average.</p>
+          <p>Two practical notes. On DomainNet a full hyperparameter search was too expensive, so we reused TerraIncognita's hyperparameters, and because the alternating updates halve the generator's iterations we trained longer there until the model saturated. Model selection still uses only training-domain validation data.</p>
+
+          <h3>What each piece contributes</h3>
+          <p>On DomainNet, removing the remix loss lowers the average from 43.1% to 42.4%, a 0.7-point drop; even without it, ADRMX is ahead of CORAL (41.8%). On PACS, removing the contrastive loss costs 1.21 points, and the variant relying on domain-invariant features costs 1.86 points relative to using domain-specific features throughout.</p>
+
+          <div class="table-wrap">
+            <table class="results">
+              <caption>Ablations, averaged over three runs. Top: DomainNet domains (Table 2). Bottom: PACS domains (Table 3).</caption>
+              <thead><tr><th>DomainNet</th><th>clip</th><th>info</th><th>paint</th><th>quick</th><th>real</th><th>sketch</th><th>Avg</th></tr></thead>
+              <tbody>
+                <tr class="is-ours"><td>ADRMX</td><td>60.8</td><td>20.9</td><td>48.6</td><td>14.1</td><td>61.8</td><td>52.4</td><td class="best">43.1</td></tr>
+                <tr><td>w/o remix loss</td><td>59.6</td><td>20.6</td><td>50.3</td><td>12.5</td><td>61.5</td><td>50.3</td><td>42.4</td></tr>
+                <tr><td>CORAL</td><td>58.7</td><td>20.9</td><td>47.3</td><td>13.6</td><td>60.2</td><td>50.2</td><td>41.8</td></tr>
+              </tbody>
+              <thead><tr><th>PACS</th><th>art</th><th>cartoon</th><th>photo</th><th>sketch</th><th></th><th></th><th>Avg</th></tr></thead>
+              <tbody>
+                <tr class="is-ours"><td>ADRMX</td><td>87.69</td><td>80.55</td><td>97.74</td><td>77.53</td><td></td><td></td><td class="best">85.87</td></tr>
+                <tr><td>w/ domain invariant</td><td>85.48</td><td>76.79</td><td>97.64</td><td>76.10</td><td></td><td></td><td>84.01</td></tr>
+                <tr><td>w/o contrastive</td><td>87.05</td><td>78.56</td><td>97.03</td><td>76.00</td><td></td><td></td><td>84.66</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>A UMAP of the penultimate-layer features on PACS shows what the domain-specific branch adds. Colored by class, both kinds of features separate the objects; colored by domain, the clusters contain sub-clusters for different domains, which suggests that the model captures the multi-modal structure of the data instead of forcing each class into a single domain-free cluster.</p>
+
+          <figure class="fig">
+            <div class="plate"><img src="fig-umap.jpg" alt="Four UMAP scatter plots of penultimate-layer features on PACS. Top row colored by class, bottom row colored by domain (cartoon, photo, sketch)." width="1009" height="937" loading="lazy"></div>
+            <figcaption><b>Figure 3.</b> UMAP of the penultimate-layer domain-specific and domain-invariant features on PACS. Top: colored by class. Bottom: the same embeddings colored by domain. Both features carry object information, while the domain-specific features can capture multi-modality across domains. From Figure 3 of the paper.</figcaption>
+          </figure>
+
+          <h2 id="takeaways" data-toc="Takeaways">Takeaways and limitations</h2>
+          <ul>
+            <li><strong>Invariance is not the only option.</strong> Modelling label features as invariant plus domain-specific parts lets a model keep domain cues that help, while still making them explicit and removable.</li>
+            <li><strong>Additivity buys an augmentation.</strong> The same decomposition lets us recombine content and domain across samples in latent space, with no extra parameters.</li>
+            <li><strong>The gains are modest.</strong> The average improvement over the strongest baseline is 0.1 points, and other methods win on most individual datasets.</li>
+            <li><strong>Adversarial training needs care.</strong> As noted for other adversarial methods, training can be unstable; we used a lower learning rate and a larger discriminator, and the restricted hyperparameter search (and borrowed hyperparameters on DomainNet) were forced by compute.</li>
+          </ul>
+
+          <h2 id="cite">Citation</h2>
+          <div class="cite">
+            <button class="btn copy" type="button" data-copy="bibtex">Copy</button>
+<pre id="bibtex">@article{demirel2023adrmx,
+  title={ADRMX: Additive Disentanglement of Domain Features with Remix Loss},
+  author={Demirel, Berker and Aptoula, Erchan and Ozkan, Huseyin},
+  journal={arXiv preprint arXiv:2308.06624},
+  year={2023}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <ul class="meta-row">
+        <li>Klosterneuburg, Austria</li>
+        <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
+        <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
+        <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
+        <li><a href="https://x.com/berkerdemirel97">Twitter</a></li>
+      </ul>
+      <p class="colophon">© 2026 Berker Demirel · Last updated October 2026 · <a href="../../legacy.html">Classic version</a></p>
+    </div>
+  </footer>
+  <script src="../../assets/js/site.js" defer></script>
+</body>
+</html>

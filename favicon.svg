@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>rect{fill:#13171a}path{stroke:#5cc6d0}@media (prefers-color-scheme:light){rect{fill:#0b6d74}path{stroke:#f4ebd9}}</style>
+  <rect width="32" height="32" rx="7"/>
+  <path d="M8 24V8M13.3 24V12.5M18.7 24V16.5M24 24v-4" fill="none" stroke-width="3.2" stroke-linecap="round"/>
+</svg>
