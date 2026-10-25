@@ -32,8 +32,7 @@
   --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --measure: 46rem;
-  --measure-wide: 62rem;
+  --measure: 54.5rem; /* one frame for every page: header, content and footer share this width */
   --prose: 40rem;
   --post-width: 48rem; /* one column width for post text, figures, tables, and the teaser */
 
@@ -185,7 +184,6 @@ p { text-wrap: pretty; }
   margin-inline: auto;
   padding-inline: 1.25rem;
 }
-.is-wide .wrap { max-width: var(--measure-wide); }
 
 /* --------------------------------------------------------------------------
    Header
@@ -587,11 +585,8 @@ main { min-height: 55vh; display: block; }
 .theme-nav a[href^="#"] .num { color: var(--topic); }
 .theme-nav a[href^="#"]:hover, .theme-nav a[href^="#"]:focus-visible { border-color: var(--topic); color: var(--topic); }
 
-/* One reading column; each area sits in a tinted box slightly wider than the text */
-.is-research .page-intro { max-width: 46rem; margin-inline: auto; }
+/* Each area sits in a tinted box that spans the page column */
 .theme {
-  max-width: calc(46rem + 5.5rem);
-  margin-inline: auto;
   padding: 2.6rem 2.75rem 2.9rem;
   border: 1px solid color-mix(in srgb, var(--topic) 24%, transparent);
   border-radius: 14px;
@@ -891,7 +886,7 @@ input[type="range"] {
 /* Paper cards (Research + Blog index) */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: 1.1rem;
   margin: 0;
   padding: 0;
