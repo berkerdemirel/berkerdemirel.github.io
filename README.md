@@ -31,8 +31,11 @@ Pages link to folders (`research/`), so open them through a server rather than a
 
 ## Common edits
 
-- **New paper:** add an entry to `publications/index.html`; if it belongs to a theme, add a
-  card to `research/index.html`; optionally add it to "Selected publications" on `index.html`.
+- **New paper:** add an entry to `publications/index.html`; if it belongs to a research area,
+  add a card to that area's "Our work" list in `research/index.html` (a list with a single
+  card uses `class="card-grid is-single"`); optionally add it to "Selected publications" on
+  `index.html`. Each area's color comes from the `--t-rep`, `--t-gen` and `--t-gnr` tokens in
+  `site.css`.
 - **New post:** copy `_templates/post.html` to `blog/<slug>/index.html`, fill in the TODOs,
   and add a card to `blog/index.html`. Posts share one column width (`--post-width` in
   `site.css`) for text, figures, tables, and the teaser.
