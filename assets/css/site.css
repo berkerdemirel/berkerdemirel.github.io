@@ -1496,6 +1496,21 @@ table.results .best { font-weight: 700; color: var(--ink); }
   font-size: .75rem;
   color: var(--ink-faint);
 }
+/* On phones a slider with end labels gets two rows: name and value, then the slider */
+@media (max-width: 34rem) {
+  .viz-controls label.is-ranged {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "name name out" "lo range hi";
+    gap: .45rem .6rem;
+    width: 100%;
+  }
+  .is-ranged .range-name { grid-area: name; }
+  .is-ranged output { grid-area: out; justify-self: end; }
+  .is-ranged .is-lo { grid-area: lo; }
+  .is-ranged input { grid-area: range; width: 100%; }
+  .is-ranged .is-hi { grid-area: hi; }
+}
 @media (max-width: 44rem) {
   .viz canvas.is-tall { height: 330px; }
 }
