@@ -1446,6 +1446,9 @@ table.results .best { font-weight: 700; color: var(--ink); }
 }
 
 .viz canvas.is-short { height: 150px; }
+/* Research charts sit in the narrower right panel; keep them wider than tall */
+.viz canvas[data-role="curves"] { height: 210px; }
+.viz canvas[data-role="probes"] { height: 260px; }
 .viz-readout-stack { flex-direction: column; gap: .35rem; margin-top: .9rem; }
 .viz-readout sub { font-size: .7em; }
 
