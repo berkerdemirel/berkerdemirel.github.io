@@ -10,7 +10,7 @@ blog/index.html         Post index
 blog/<slug>/            One post per paper: index.html, teaser.mp4, poster.jpg, fig-*.png
 cv/index.html           CV summary (cv/00_Berker_Demirel_CV.pdf is the full CV)
 assets/css/site.css     Design tokens (light/dark), layout, components
-assets/js/site.js       Theme toggle, card video previews, BibTeX copy, post TOC
+assets/js/site.js       Theme toggle, card video previews, BibTeX copy and dialogs, post TOC
 assets/js/research-viz.js  The three interactive sketches
 legacy.html             The previous single-page site, unchanged
 _templates/post.html    Starting point for a new post

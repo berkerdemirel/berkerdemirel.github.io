@@ -1,5 +1,5 @@
 // Shared behaviour for every page: theme toggle, card video previews,
-// BibTeX copy buttons, and the post table of contents.
+// BibTeX copy buttons and dialogs, and the post table of contents.
 (() => {
   const root = document.documentElement;
   const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -118,4 +118,61 @@
   };
   window.addEventListener('hashchange', reveal);
   reveal();
+
+  // ---- BibTeX links: show the entry in a dialog instead of downloading --
+  const bibLinks = document.querySelectorAll('a[href$=".bib"]');
+  if (bibLinks.length && typeof HTMLDialogElement === 'function') {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'bib-dialog';
+    dialog.setAttribute('aria-labelledby', 'bib-dialog-title');
+    dialog.innerHTML = '<p class="kicker" id="bib-dialog-title">BibTeX</p><pre></pre>'
+      + '<div class="bib-actions"><button class="btn" type="button" data-act="copy">Copy</button>'
+      + '<button class="btn" type="button" data-act="close">Close</button></div>';
+    document.body.append(dialog);
+    const pre = dialog.querySelector('pre');
+    const copyBtn = dialog.querySelector('[data-act="copy"]');
+    const cache = new Map();
+
+    dialog.querySelector('[data-act="close"]').addEventListener('click', () => dialog.close());
+    // A click on the backdrop lands on the dialog itself, outside its box
+    dialog.addEventListener('click', (e) => {
+      if (e.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    });
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.textContent);
+        copyBtn.textContent = 'Copied';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+        copyBtn.textContent = 'Select & copy';
+      }
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1600);
+    });
+
+    for (const link of bibLinks) {
+      link.addEventListener('click', async (e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        try {
+          if (!cache.has(link.href)) {
+            const res = await fetch(link.href);
+            if (!res.ok) throw new Error(String(res.status));
+            cache.set(link.href, (await res.text()).trim());
+          }
+        } catch {
+          location.href = link.href;
+          return;
+        }
+        pre.textContent = cache.get(link.href);
+        copyBtn.textContent = 'Copy';
+        dialog.showModal();
+        copyBtn.focus();
+      });
+    }
+  }
 })();

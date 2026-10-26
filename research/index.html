@@ -48,8 +48,8 @@
   <main id="main" class="wrap">
     <header class="page-intro">
       <h1>Research</h1>
-      <p>I study the geometry and structure of neural representations: how they are organized, when they collapse, and how they behave under distribution shift. That interest spreads into three closely related areas. Representation learning asks what makes a representation good and how to learn one. Generalization asks when what a model has learned carries over beyond its training distribution, and how to tell when it does not. Generation asks how to learn a data distribution well enough to sample from it, and how to judge the samples.</p>
-      <p>The three keep running into each other. How far a model generalizes depends on the representations it learns; generated samples are judged in learned feature spaces, and they matter most exactly where generalization is in question.</p>
+      <p>I study the geometry and structure of neural representations: how they are organized, when they collapse, and how they behave under distribution shift. My research focuses on three closely related areas. Representation learning looks at what information representations contain, how easily it can be read out and how to learn useful ones. Generalization is about how well models perform outside their training distribution and how to detect when they fail. Generative modeling focuses on learning data distributions, generating new samples and evaluating their quality.</p>
+      <p>These areas are closely connected, as the quality and structure of learned representations affect how well models generalize, how we learn data distributions and how we evaluate generative models.</p>
       <ul class="theme-nav" aria-label="Areas">
         <li><a href="#representation"><span class="num">01</span>Representation learning</a></li>
         <li><a href="#generalization"><span class="num">02</span>Generalization</a></li>
@@ -61,7 +61,7 @@
     <section class="theme" id="representation" aria-labelledby="t1">
       <h2 id="t1" class="theme-title"><span class="num">01</span>Representation learning</h2>
       <div class="definition">
-          <p>A representation maps raw inputs to features that other models build on, usually without knowing in advance which tasks will come. Two desiderata make “good” concrete. The representation should be <strong>task-agnostic</strong>: the information downstream tasks need should be there. And it should be <strong>easily probeable</strong>: that information should be readable without much effort, for instance by a linear probe.</p>
+          <p>A representation turns data into features that other models can use. The challenge is that we often don't know ahead of time what those models will need to do. Ideally, a good representation should be useful across many different tasks, while also making the relevant information easy to extract, even with something as simple as a linear probe.</p>
       </div>
 
       <figure class="viz" data-viz="desiderata">
@@ -99,9 +99,9 @@
       <div class="theme-block">
         <p class="kicker">Open questions</p>
         <ul class="questions">
-            <li>What makes a representation good, and how can we tell without knowing the downstream tasks?</li>
-            <li>How can we learn representations that meet both desiderata, ideally without labels?</li>
-            <li>How does the geometry of a representation, the way information spreads across its directions, shape what can be read from it?</li>
+            <li>What makes a representation good if we don't know what it will eventually be used for?</li>
+            <li>How can we learn representations that are both broadly useful and easy to work with, ideally without labels?</li>
+            <li>How does the way information is spread across different directions affect what we can actually read from a representation?</li>
           </ul>
       </div>
 
@@ -131,7 +131,7 @@
     <section class="theme" id="generalization" aria-labelledby="t2">
       <h2 id="t2" class="theme-title"><span class="num">02</span>Generalization</h2>
       <div class="definition">
-          <p>Generalization is about when a model can go beyond its training distribution and when it cannot. The training data never pin down a model's behavior everywhere, so how far it carries depends on assumptions about how training and deployment differ: which factors may change, which stay fixed, and whether a change is visible in the inputs at all. When those assumptions fail, the next best thing is to notice, for classifiers and generative models alike.</p>
+          <p>Generalization is about how well a model performs on data outside its training distribution. Since training data can never cover every possible situation, generalization depends on what changes between training and testing, what stays the same, and which changes can be identified from the inputs. When a model fails to generalize, we also want to be able to detect that, including across different learning paradigms.</p>
       </div>
 
       <figure class="viz" data-viz="shift">
@@ -182,9 +182,9 @@
       <div class="theme-block">
         <p class="kicker">Open questions</p>
         <ul class="questions">
-            <li>When should we expect a model to generalize, and what does that require of the data and the model?</li>
-            <li>Can we detect when a model fails to generalize?</li>
-            <li>How do models from different learning paradigms, such as classifiers and generative models, react to the same shift?</li>
+            <li>When can we expect a model to generalize, and what does that depend on?</li>
+            <li>Can we tell when a model fails to generalize?</li>
+            <li>How do different types of models, such as classifiers and generative models, respond to the same changes in the data?</li>
           </ul>
       </div>
 
@@ -244,7 +244,7 @@
     <section class="theme" id="generation" aria-labelledby="t3">
       <h2 id="t3" class="theme-title"><span class="num">03</span>Generation</h2>
       <div class="definition">
-          <p>Generative modeling is the effort to sample from a data distribution: unconditionally, learning the distribution of the inputs alone, or conditionally, given a label, attributes, or an experimental condition. The model only ever sees a finite sample, so it has to balance staying close to that sample against generalizing beyond it, and judging how well it did is a problem of its own.</p>
+          <p>Generative modeling is about learning a data distribution so that we can generate new samples from it. Since a model only sees a limited amount of training data, the challenge is to learn the underlying distribution rather than simply reproduce what it has seen. Evaluating the results is not straightforward either. With high-dimensional data, there are many ways a model can get the distribution wrong and limited real data makes these problems hard to detect. A good score on one metric may therefore hide important problems. This is why we need to assess the quality of generated samples in different ways.</p>
       </div>
 
       <figure class="viz" data-viz="generative">
@@ -275,9 +275,9 @@
       <div class="theme-block">
         <p class="kicker">Open questions</p>
         <ul class="questions">
-            <li>How can we model an input distribution? Diffusion and latent diffusion models, GANs, and drifting models take very different routes.</li>
-            <li>Can a model generate novel examples, or does it memorize its training data?</li>
-            <li>How can we assess whether a generation is good? Distributional metrics, classifier-based evaluation of conditional samples, and independent, domain-specific evaluators each see a different part of the answer.</li>
+            <li>How can we learn a data distribution? Approaches like diffusion models, latent diffusion models, GANs and drifting models do this in different ways.</li>
+            <li>Can a model generate genuinely new samples or does it mostly memorize its training data?</li>
+            <li>How can we tell if generated samples are good? Distributional metrics, classifier-based evaluation, qualitative assessment and independent domain-specific evaluators each test different aspects of quality.</li>
           </ul>
       </div>
 
@@ -322,7 +322,7 @@
   <footer class="site-foot">
     <div class="wrap">
       <ul class="meta-row">
-        <li>Klosterneuburg, Austria</li>
+        <li>Vienna, Austria</li>
         <li><a href="mailto:berker.demirel@ist.ac.at">Email</a></li>
         <li><a href="https://github.com/berkerdemirel/">GitHub</a></li>
         <li><a href="https://scholar.google.com/citations?user=5Hz3S3oAAAAJ&amp;hl=en&amp;oi=ao">Scholar</a></li>
